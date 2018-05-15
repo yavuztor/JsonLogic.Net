@@ -88,42 +88,16 @@ namespace JsonLogic.Net
             AddOperation(">=", DoubleArgsSatisfy((prev, next) => prev >= next));
 
             AddOperation("var", (p, args, data) => {
-                var names = p.Apply(args.First(), data).ToString().Split('.');
-                object defaultValue = (args.Count() == 2) ? p.Apply(args.Last(), data) : null;
-                object d = data;
-                foreach (string name in names) 
+                var names = p.Apply(args.First(), data).ToString();
+                try 
                 {
-                    if (d == null) return null;
-
-                    try 
-                    {
-                        if (d.GetType().IsArray) 
-                        {
-                            d = (d as Array).GetValue(int.Parse(name));
-                        }
-                        else if (typeof(IEnumerable<object>).IsAssignableFrom(d.GetType())) 
-                        {
-                            d = (d as IEnumerable<object>).Skip(int.Parse(name)).First();
-                        }
-                        else if (typeof(IDictionary<string, object>).IsAssignableFrom(d.GetType()))
-                        {
-                            var dict = (d as IDictionary<string, object>);
-                            if (!dict.ContainsKey(name)) return defaultValue;
-                            d = dict[name];
-                        }
-                        else 
-                        {
-                            var property = d.GetType().GetProperty(name, BindingFlags.Public);
-                            if (property == null) return defaultValue;
-                            d = property.GetValue(d);
-                        }
-                    }
-                    catch (Exception e) 
-                    {
-                        return defaultValue;
-                    }
+                    return GetValueByName(data, names);
                 }
-                return d;
+                catch (Exception e) 
+                {
+                    object defaultValue = (args.Count() == 2) ? p.Apply(args.Last(), data) : null;
+                    return defaultValue;
+                }
             });
 
             AddOperation("and", (p, args, data) => {
@@ -151,6 +125,49 @@ namespace JsonLogic.Net
                 }
                 return p.Apply(args[args.Length - 1], data);
             });
+
+            AddOperation("missing", (p, args, data) => args.Select(a => p.Apply(a, data).ToString()).Where(n => {
+                try 
+                {
+                    GetValueByName(data, n);
+                    return false;
+                }
+                catch
+                {
+                    return true;
+                }
+            }));
+        }
+
+        private object GetValueByName(object data, string namePath)
+        {
+            string[] names = namePath.Split('.');
+            object d = data;
+            foreach (string name in names) 
+            {
+                if (d == null) return null;
+                if (d.GetType().IsArray) 
+                {
+                    d = (d as Array).GetValue(int.Parse(name));
+                }
+                else if (typeof(IEnumerable<object>).IsAssignableFrom(d.GetType())) 
+                {
+                    d = (d as IEnumerable<object>).Skip(int.Parse(name)).First();
+                }
+                else if (typeof(IDictionary<string, object>).IsAssignableFrom(d.GetType()))
+                {
+                    var dict = (d as IDictionary<string, object>);
+                    if (!dict.ContainsKey(name)) throw new Exception();
+                    d = dict[name];
+                }
+                else 
+                {
+                    var property = d.GetType().GetProperty(name, BindingFlags.Public);
+                    if (property == null) throw new Exception();
+                    d = property.GetValue(d);
+                }
+            }
+            return d;
         }
 
         private Func<IProcessJsonLogic, JToken[], object, object> DoubleArgsSatisfy(Func<double, double, bool> criteria)

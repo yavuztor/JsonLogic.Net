@@ -81,6 +81,8 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`var`: [`nonexistent`, `default-value`]}", "default-value")]
         [InlineData("{`var`: `luckyNumbers.1`}", 5)]
 
+        [InlineData("{`missing`:[`a`, `b`, `name`]}", new object[]{"a", "b"})]
+
         [InlineData("{`and`: [true, true]}", true)]
         [InlineData("{`and`: [true, false]}", false)]
         [InlineData("{`and`: [false, true]}", false)]
@@ -94,7 +96,9 @@ namespace JsonLogic.Net.UnitTests
 
         [InlineData("{`if`: [true, `yes`, `no`]}", "yes")]
         [InlineData("{`if`: [false, `yes`, `no`]}", "no")]
-        [InlineData("{`if`: [false, `yes`, `no`]}", "no")]
+        [InlineData("{`if`: [false, `yes`, false, `maybe`, `no`]}", "no")]
+        [InlineData("{`if`: [false, `yes`, true, `maybe`, `no`]}", "maybe")]
+        [InlineData("{`if`: [true, `yes`, true, `maybe`, `no`]}", "yes")]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange
