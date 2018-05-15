@@ -52,6 +52,12 @@ namespace JsonLogic.Net
         private void AddDefaultOperations()
         {
             AddOperation("==", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            
+            AddOperation("===", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+
+            AddOperation("!==", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+
+            AddOperation("!=", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
 
             AddOperation("+", (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Aggregate((prev, next) =>
             {
@@ -136,6 +142,14 @@ namespace JsonLogic.Net
                     value = Convert.ToBoolean(p.Apply(args[i], data));
                 }
                 return value;
+            });
+
+            AddOperation("if", (p, args, data) => {
+                for (var i = 0; i < args.Length - 1; i += 2) 
+                {
+                    if (Convert.ToBoolean(p.Apply(args[i], data))) return p.Apply(args[i+1], data);
+                }
+                return p.Apply(args[args.Length - 1], data);
             });
         }
 

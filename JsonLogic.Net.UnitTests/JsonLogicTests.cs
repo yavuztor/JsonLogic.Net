@@ -19,6 +19,14 @@ namespace JsonLogic.Net.UnitTests
 
         [Theory]
         [InlineData("{`==`: [1, 1]}", true)]
+        [InlineData("{`==`: [{`var`: `name`}, `John Doe`]}", true)]
+        [InlineData("{`===`: [1, 1]}", true)]
+        [InlineData("{`===`: [{`var`: `name`}, `John Doe`]}", true)]
+
+        [InlineData("{`!=`: [1, 1]}", false)]
+        [InlineData("{`!=`: [{`var`: `name`}, `John Doe`]}", false)]
+        [InlineData("{`!==`: [1, 1]}", false)]
+        [InlineData("{`!==`: [{`var`: `name`}, `John Doe`]}", false)]
 
         [InlineData("{`+`: [0,0]}", 0d)]
         [InlineData("{`+`: [1,1]}", 2d)]
@@ -83,6 +91,10 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`or`: [false, true]}", true)]
         [InlineData("{`or`: [true, false]}", true)]
         [InlineData("{`or`: [false, false]}", false)]
+
+        [InlineData("{`if`: [true, `yes`, `no`]}", "yes")]
+        [InlineData("{`if`: [false, `yes`, `no`]}", "no")]
+        [InlineData("{`if`: [false, `yes`, `no`]}", "no")]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange
