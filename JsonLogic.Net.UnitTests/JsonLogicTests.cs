@@ -61,11 +61,28 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`<=`: [1, 2, 3]}", true)]
         [InlineData("{`<=`: [1, 1, 3]}", true)]
         [InlineData("{`<=`: [1, 4, 3]}", false)]
+        [InlineData("{`>`: [3, 2, 1]}", true)]
+        [InlineData("{`>`: [3, 1, 1]}", false)]
+        [InlineData("{`>`: [3, 4, 1]}", false)]
+        [InlineData("{`>=`: [3, 2, 1]}", true)]
+        [InlineData("{`>=`: [3, 1, 1]}", true)]
+        [InlineData("{`>=`: [3, 4, 1]}", false)]
 
         [InlineData("{`var`: `name`}", "John Doe")]
         [InlineData("{`var`: `address.zip`}", "33333")]
         [InlineData("{`var`: [`nonexistent`, `default-value`]}", "default-value")]
         [InlineData("{`var`: `luckyNumbers.1`}", 5)]
+
+        [InlineData("{`and`: [true, true]}", true)]
+        [InlineData("{`and`: [true, false]}", false)]
+        [InlineData("{`and`: [false, true]}", false)]
+        [InlineData("{`and`: [false, false]}", false)]
+        [InlineData("{`and`: [{`==`: [5,5]}, {`<`: [3,5]}]}", true)]
+        
+        [InlineData("{`or`: [true, true]}", true)]
+        [InlineData("{`or`: [false, true]}", true)]
+        [InlineData("{`or`: [true, false]}", true)]
+        [InlineData("{`or`: [false, false]}", false)]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange

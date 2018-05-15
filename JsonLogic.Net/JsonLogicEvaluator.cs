@@ -119,6 +119,24 @@ namespace JsonLogic.Net
                 }
                 return d;
             });
+
+            AddOperation("and", (p, args, data) => {
+                bool value = Convert.ToBoolean(p.Apply(args[0], data));
+                for (var i = 1; i < args.Length && value; i++) 
+                {
+                    value = Convert.ToBoolean(p.Apply(args[i], data));
+                }
+                return value;
+            });
+
+            AddOperation("or", (p, args, data) => {
+                bool value = Convert.ToBoolean(p.Apply(args[0], data));
+                for (var i = 1; i < args.Length && !value; i++) 
+                {
+                    value = Convert.ToBoolean(p.Apply(args[i], data));
+                }
+                return value;
+            });
         }
 
         private Func<IProcessJsonLogic, JToken[], object, object> DoubleArgsSatisfy(Func<double, double, bool> criteria)
