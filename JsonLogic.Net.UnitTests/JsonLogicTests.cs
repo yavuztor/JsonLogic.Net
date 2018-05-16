@@ -82,6 +82,8 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`var`: `luckyNumbers.1`}", 5)]
 
         [InlineData("{`missing`:[`a`, `b`, `name`]}", new object[]{"a", "b"})]
+        [InlineData("{`missing_some`:[2, [`a`, `b`, `name`]]}", new object[]{"a", "b"})]
+        [InlineData("{`missing_some`:[1, [`a`, `b`, `name`]]}", new object[0])]
 
         [InlineData("{`and`: [true, true]}", true)]
         [InlineData("{`and`: [true, false]}", false)]

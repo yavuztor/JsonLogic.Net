@@ -137,6 +137,14 @@ namespace JsonLogic.Net
                     return true;
                 }
             }));
+
+            AddOperation("missing_some", (p, args, data) => {
+                var minRequired = Convert.ToDouble(p.Apply(args[0], data));
+                var keys = (args[1] as JArray).ToArray();
+                var missingKeys = GetOperation("missing").Invoke(p, keys, data) as IEnumerable<object>;
+                var validKeyCount = keys.Length - missingKeys.Count();
+                return (validKeyCount >= minRequired) ? new object[0] : missingKeys;
+            });
         }
 
         private object GetValueByName(object data, string namePath)
