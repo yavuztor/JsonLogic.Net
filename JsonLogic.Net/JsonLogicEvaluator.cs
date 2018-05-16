@@ -145,10 +145,40 @@ namespace JsonLogic.Net
                 var validKeyCount = keys.Length - missingKeys.Count();
                 return (validKeyCount >= minRequired) ? new object[0] : missingKeys;
             });
+
+            AddOperation("map", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                return arr.Select(item => p.Apply(args[1], item)).ToArray();
+            });
+
+            AddOperation("filter", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                return arr.Where(item => Convert.ToBoolean(p.Apply(args[1], item))).ToArray();
+            });
+
+            AddOperation("reduce", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                var initialValue = p.Apply(args[2], data);
+                return arr.Aggregate(initialValue, (acc, current) => {
+                    object result = p.Apply(args[1], new{current = current, accumulator = acc});
+                    return result;
+                });
+            });
+        }
+
+        private IEnumerable<object> MakeEnumerable(object value)
+        {
+            if (value is Array) return (value as Array).Cast<object>();
+
+            if (value is IEnumerable<object>) return (value as IEnumerable<object>);
+
+            throw new ArgumentException("Argument is not enumerable");
         }
 
         private object GetValueByName(object data, string namePath)
         {
+            if (string.IsNullOrEmpty(namePath)) return data;
+
             string[] names = namePath.Split('.');
             object d = data;
             foreach (string name in names) 
@@ -170,7 +200,7 @@ namespace JsonLogic.Net
                 }
                 else 
                 {
-                    var property = d.GetType().GetProperty(name, BindingFlags.Public);
+                    var property = d.GetType().GetProperty(name);
                     if (property == null) throw new Exception();
                     d = property.GetValue(d);
                 }

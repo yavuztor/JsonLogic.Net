@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -101,6 +103,11 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`if`: [false, `yes`, false, `maybe`, `no`]}", "no")]
         [InlineData("{`if`: [false, `yes`, true, `maybe`, `no`]}", "maybe")]
         [InlineData("{`if`: [true, `yes`, true, `maybe`, `no`]}", "yes")]
+
+        [InlineData("{`map`: [{`var`:`luckyNumbers`}, {`*`: [{`var`:``}, 3]} ]}", new object[]{9, 15, 21})]
+        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 5]} ]}", new object[]{7})]
+        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>=`: [{`var`:``}, 5]} ]}", new object[]{5, 7})]
+        [InlineData("{`reduce`: [{`var`:`luckyNumbers`}, {`+`: [{`var`:`current`}, {`var`:`accumulator`}]}, 10 ]}", 25d)]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange
@@ -111,7 +118,22 @@ namespace JsonLogic.Net.UnitTests
             var result = jsonLogic.Apply(rules, data);
 
             // Assert
-            Assert.Equal(expectedResult, result);
+            if (expectedResult is Array) {
+                string[] expectedResultArr = (expectedResult as Array).Cast<object>().Select(i => i.ToString()).ToArray();
+                string[] resultArr;
+
+                if (result is Array) 
+                    resultArr = (result as Array).Cast<object>().Select(i => i.ToString()).ToArray();
+                else if (result is IEnumerable<object>) 
+                    resultArr = (result as IEnumerable<object>).Select(i => i.ToString()).ToArray();
+                else 
+                    throw new Exception("Cannot cast resultArr");
+                
+                Assert.Equal(expectedResultArr, resultArr);
+            }
+            else {
+                Assert.Equal(expectedResult, result);
+            }
         }
 
         [Theory]
