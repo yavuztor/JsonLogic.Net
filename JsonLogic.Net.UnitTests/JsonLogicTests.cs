@@ -108,6 +108,10 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 5]} ]}", new object[]{7})]
         [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>=`: [{`var`:``}, 5]} ]}", new object[]{5, 7})]
         [InlineData("{`reduce`: [{`var`:`luckyNumbers`}, {`+`: [{`var`:`current`}, {`var`:`accumulator`}]}, 10 ]}", 25d)]
+        [InlineData("{`all`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 1]} ]}", true)]
+        [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 1]} ]}", true)]
+        [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", false)]
+        [InlineData("{`some`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", true)]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange

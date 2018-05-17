@@ -164,6 +164,21 @@ namespace JsonLogic.Net
                     return result;
                 });
             });
+
+            AddOperation("all", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                return arr.All(item => Convert.ToBoolean(p.Apply(args[1], item)));
+            });
+
+            AddOperation("none", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                return !arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
+            });
+
+            AddOperation("some", (p, args, data) => {
+                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                return arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
+            });
         }
 
         private IEnumerable<object> MakeEnumerable(object value)
