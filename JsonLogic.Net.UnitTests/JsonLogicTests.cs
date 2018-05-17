@@ -173,6 +173,22 @@ namespace JsonLogic.Net.UnitTests
                 Assert.Equal(null, result);
             }
         }
+
+        [Fact]
+        public void SimpleUseCase()
+        {
+            // Arrange
+            string jsonText="{\">\": [{\"var\": \"MyNumber\"}, 3]}";
+            var rule = JObject.Parse(jsonText);
+            object data = new {MyNumber = 8};
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+            
+            // Act
+            var result = evaluator.Apply(rule, data);
+            
+            // Assert
+            Assert.True((bool)result);
+        }
         public static JObject JsonFrom(string input) {
             return JObject.Parse(input.Replace('`', '"'));
         }
