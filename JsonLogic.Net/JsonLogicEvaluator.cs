@@ -192,8 +192,20 @@ namespace JsonLogic.Net
 
             AddOperation("in", (p, args, data) => {
                 object needle = p.Apply(args[0], data);
-                var haystack = MakeEnumerable(p.Apply(args[1], data));
-                return haystack.Any(item => item.Equals(needle));
+                object haystack = p.Apply(args[1], data);
+                if (haystack is String) return (haystack as string).IndexOf(needle.ToString()) >= 0;
+
+                return MakeEnumerable(haystack).Any(item => item.Equals(needle));
+            });
+
+            AddOperation("cat", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate("", (acc, current) => acc + current.ToString()));
+
+            AddOperation("substr", (p, args, data) => {
+                string value = p.Apply(args[0], data).ToString();
+                int start = Convert.ToInt32(p.Apply(args[1], data));
+                if (start < 0) start += value.Length;
+                int length = (args.Count() == 2) ? value.Length - start : Convert.ToInt32(p.Apply(args[2], data));
+                return value.Substring(start, length);
             });
         }
 

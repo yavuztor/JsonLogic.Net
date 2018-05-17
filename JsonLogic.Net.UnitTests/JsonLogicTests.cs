@@ -116,6 +116,14 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`merge`:[ 1,2, [3,4] ]}", new object[]{1, 2, 3, 4})]
         [InlineData("{`in`:[ 1, [3,4,1] ]}", true)]
         [InlineData("{`in`:[ 2, [3,4,1] ]}", false)]
+        
+        [InlineData("{`in`: [`Spring`, `Springfield`]}", true)]
+        [InlineData("{`in`: [`Springs`, `Springfield`]}", false)]
+        [InlineData("{`in`: [`spring`, `Springfield`]}", false)]
+        [InlineData("{`cat`: [`spring`, `field`]}", "springfield")]
+        [InlineData("{`substr`: [`springfield`, 6]}", "field")]
+        [InlineData("{`substr`: [`springfield`, 6, 3]}", "fie")]
+        [InlineData("{`substr`: [`springfield`, -3]}", "eld")]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange
