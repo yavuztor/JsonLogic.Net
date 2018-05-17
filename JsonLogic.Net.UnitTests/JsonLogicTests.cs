@@ -112,6 +112,10 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 1]} ]}", true)]
         [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", false)]
         [InlineData("{`some`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", true)]
+        [InlineData("{`merge`:[ [1,2], [3,4] ]}", new object[]{1, 2, 3, 4})]
+        [InlineData("{`merge`:[ 1,2, [3,4] ]}", new object[]{1, 2, 3, 4})]
+        [InlineData("{`in`:[ 1, [3,4,1] ]}", true)]
+        [InlineData("{`in`:[ 2, [3,4,1] ]}", false)]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange

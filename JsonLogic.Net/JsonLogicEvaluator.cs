@@ -25,6 +25,7 @@ namespace JsonLogic.Net
         {
             if (rule is null) return null;
             if (rule is JValue) return (rule as JValue).Value;
+            if (rule is JArray) return (rule as JArray).Select(r => Apply(r, data));
 
             var ruleObj = (JObject) rule;
             var p = ruleObj.Properties().First();
@@ -178,6 +179,21 @@ namespace JsonLogic.Net
             AddOperation("some", (p, args, data) => {
                 IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
                 return arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
+            });
+
+            AddOperation("merge", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate((IEnumerable<object>)new object[0], (acc, current) => {
+                try {
+                    return acc.Concat(MakeEnumerable(current));
+                }
+                catch {
+                    return acc.Concat(new object[]{ current });
+                }
+            }));
+
+            AddOperation("in", (p, args, data) => {
+                object needle = p.Apply(args[0], data);
+                var haystack = MakeEnumerable(p.Apply(args[1], data));
+                return haystack.Any(item => item.Equals(needle));
             });
         }
 
