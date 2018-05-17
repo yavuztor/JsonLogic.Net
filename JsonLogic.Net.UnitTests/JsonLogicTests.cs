@@ -124,6 +124,7 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`substr`: [`springfield`, 6]}", "field")]
         [InlineData("{`substr`: [`springfield`, 6, 3]}", "fie")]
         [InlineData("{`substr`: [`springfield`, -3]}", "eld")]
+        [InlineData("{`log`: `apple`}", "apple")]
         public void Apply(string argsJson, object expectedResult) 
         {
             // Arrange

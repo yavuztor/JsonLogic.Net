@@ -207,6 +207,12 @@ namespace JsonLogic.Net
                 int length = (args.Count() == 2) ? value.Length - start : Convert.ToInt32(p.Apply(args[2], data));
                 return value.Substring(start, length);
             });
+
+            AddOperation("log", (p, args, data) => {
+                object value = p.Apply(args[0], data);
+                Console.WriteLine(value);
+                return value;
+            });
         }
 
         private IEnumerable<object> MakeEnumerable(object value)
