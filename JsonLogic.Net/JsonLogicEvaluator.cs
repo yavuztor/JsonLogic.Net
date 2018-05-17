@@ -8,9 +8,9 @@ namespace JsonLogic.Net
 {
     public class JsonLogicEvaluator : IProcessJsonLogic
     {
-        private IManageOperations operations;
+        private IManageOperators operations;
 
-        public JsonLogicEvaluator(IManageOperations operations)
+        public JsonLogicEvaluator(IManageOperators operations)
         {
             this.operations = operations;
         }
@@ -25,7 +25,7 @@ namespace JsonLogic.Net
             var p = ruleObj.Properties().First();
             var opName = p.Name;
             var opArgs = (p.Value is JArray) ? (p.Value as JArray).ToArray() : new JToken[] { p.Value };
-            var op = operations.GetOperation(opName);
+            var op = operations.GetOperator(opName);
             return op(this, opArgs, data);
         }
 

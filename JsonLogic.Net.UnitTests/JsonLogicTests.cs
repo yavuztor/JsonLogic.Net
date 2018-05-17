@@ -129,7 +129,7 @@ namespace JsonLogic.Net.UnitTests
         {
             // Arrange
             var rules = JsonFrom( argsJson );
-            var jsonLogic = new JsonLogicEvaluator(EvaluatorOperations.Default);
+            var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
             
             // Act
             var result = jsonLogic.Apply(rules, data);
@@ -159,7 +159,7 @@ namespace JsonLogic.Net.UnitTests
         {
             // Arrange
             var rules = JsonFrom(rulesJson);
-            var jsonLogic = new JsonLogicEvaluator(EvaluatorOperations.Default);
+            var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
             object result = null;
             
             // Act & Assert
