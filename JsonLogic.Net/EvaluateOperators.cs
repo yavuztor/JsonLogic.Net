@@ -32,40 +32,46 @@ namespace JsonLogic.Net
             return registry[name];
         }
 
-        private bool IsAny<T>(params object[] subjects) 
+        public static bool IsAny<T>(params object[] subjects) 
         {
             return subjects.Any(x => x != null && x is T);
         }
 
         private void AddDefaultOperations()
         {
-            AddOperator("==", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("==", (p, args, data) => p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
             
             AddOperator("===", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
 
-            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("!=", (p, args, data) => !p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
 
-            AddOperator("!=", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
 
             AddOperator("+", (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Aggregate((prev, next) =>
             {
-                if (IsAny<string>(next, prev))
+                try 
+                {
+                    return Convert.ToDouble(prev ?? 0d) + Convert.ToDouble(next);
+                }
+                catch 
+                {
                     return (prev ?? string.Empty).ToString() + next.ToString();
-
-                return Convert.ToDouble(prev ?? 0d) + Convert.ToDouble(next);
+                }
             }));
 
-            AddOperator("-", ReduceDoubleArgs((prev, next) => prev - next));
+            AddOperator("-", ReduceDoubleArgs(0d, (prev, next) => prev - next));
 
-            AddOperator("/", ReduceDoubleArgs((prev, next) => prev / next));
+            AddOperator("/", ReduceDoubleArgs(1, (prev, next) => prev / next));
 
-            AddOperator("*", ReduceDoubleArgs((prev, next) => prev * next));
+            AddOperator("*", ReduceDoubleArgs(1, (prev, next) => prev * next));
 
-            AddOperator("%", ReduceDoubleArgs((prev, next) => prev % next));
+            AddOperator("%", ReduceDoubleArgs(1, (prev, next) => prev % next));
 
-            AddOperator("max", ReduceDoubleArgs((prev, next) => (prev > next) ? prev : next));
+            AddOperator("max", (p, args, data) => args.Select(a => Convert.ToDouble(p.Apply(a, data)))
+                .Aggregate((prev, next) => prev > next ? prev : next));
 
-            AddOperator("min", ReduceDoubleArgs((prev, next) => (prev < next) ? prev : next));
+            AddOperator("min", (p, args, data) => args.Select(a => Convert.ToDouble(p.Apply(a, data)))
+                .Aggregate((prev, next) => (prev < next) ? prev : next));
 
             AddOperator("<", DoubleArgsSatisfy((prev, next) => prev < next));
 
@@ -76,10 +82,14 @@ namespace JsonLogic.Net
             AddOperator(">=", DoubleArgsSatisfy((prev, next) => prev >= next));
 
             AddOperator("var", (p, args, data) => {
-                var names = p.Apply(args.First(), data).ToString();
+                if (args.Count() == 0) return data;
+
+                var names = p.Apply(args.First(), data);
+                if (names == null) return data;
+
                 try 
                 {
-                    return GetValueByName(data, names);
+                    return GetValueByName(data, names.ToString());
                 }
                 catch (Exception e) 
                 {
@@ -89,42 +99,56 @@ namespace JsonLogic.Net
             });
 
             AddOperator("and", (p, args, data) => {
-                bool value = Convert.ToBoolean(p.Apply(args[0], data));
-                for (var i = 1; i < args.Length && value; i++) 
+                object value = p.Apply(args[0], data);
+                for (var i = 1; i < args.Length && value.IsTruthy(); i++) 
                 {
-                    value = Convert.ToBoolean(p.Apply(args[i], data));
+                    value = p.Apply(args[i], data);
                 }
                 return value;
             });
 
             AddOperator("or", (p, args, data) => {
-                bool value = Convert.ToBoolean(p.Apply(args[0], data));
-                for (var i = 1; i < args.Length && !value; i++) 
+                object value = p.Apply(args[0], data);
+                for (var i = 1; i < args.Length && !value.IsTruthy(); i++) 
                 {
-                    value = Convert.ToBoolean(p.Apply(args[i], data));
+                    value = p.Apply(args[i], data);
                 }
                 return value;
             });
 
+            AddOperator("!!", (p, args, data) => p.Apply(args.First(), data).IsTruthy());
+
+            AddOperator("!", (p, args, data) => !p.Apply(args.First(), data).IsTruthy());
+
+            AddOperator("not", GetOperator("!"));
+
             AddOperator("if", (p, args, data) => {
                 for (var i = 0; i < args.Length - 1; i += 2) 
                 {
-                    if (Convert.ToBoolean(p.Apply(args[i], data))) return p.Apply(args[i+1], data);
+                    if (p.Apply(args[i], data).IsTruthy()) return p.Apply(args[i+1], data);
                 }
+                if (args.Length % 2 == 0) return null;
                 return p.Apply(args[args.Length - 1], data);
             });
 
-            AddOperator("missing", (p, args, data) => args.Select(a => p.Apply(a, data).ToString()).Where(n => {
-                try 
-                {
-                    GetValueByName(data, n);
-                    return false;
-                }
-                catch
-                {
-                    return true;
-                }
-            }));
+            AddOperator("?:", GetOperator("if"));
+
+            AddOperator("missing", (p, args, data) => {
+                var names = args.Select(a => p.Apply(a, data));
+                if (names.Count() == 1 && names.First().IsEnumerable()) names = names.First().MakeEnumerable();
+                if (data == null) return names.ToArray();
+                return names.Select(n => n.ToString()).Where(n => {
+                    try 
+                    {
+                        GetValueByName(data, n);
+                        return false;
+                    }
+                    catch
+                    {
+                        return true;
+                    }
+                }).ToArray();
+            });
 
             AddOperator("missing_some", (p, args, data) => {
                 var minRequired = Convert.ToDouble(p.Apply(args[0], data));
@@ -135,45 +159,50 @@ namespace JsonLogic.Net
             });
 
             AddOperator("map", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
-                return arr.Select(item => p.Apply(args[1], item)).ToArray();
+                object arr = p.Apply(args[0], data);
+                if (arr == null) return new object[0];
+
+                return arr.MakeEnumerable().Select(item => p.Apply(args[1], item)).ToArray();
             });
 
             AddOperator("filter", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
                 return arr.Where(item => Convert.ToBoolean(p.Apply(args[1], item))).ToArray();
             });
 
             AddOperator("reduce", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
                 var initialValue = p.Apply(args[2], data);
-                return arr.Aggregate(initialValue, (acc, current) => {
+                object arr = p.Apply(args[0], data);
+                if (!arr.IsEnumerable()) return initialValue;
+
+                return arr.MakeEnumerable().Aggregate(initialValue, (acc, current) => {
                     object result = p.Apply(args[1], new{current = current, accumulator = acc});
                     return result;
                 });
             });
 
             AddOperator("all", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
+                if (arr.Count() == 0) return false;
                 return arr.All(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
             AddOperator("none", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
                 return !arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
             AddOperator("some", (p, args, data) => {
-                IEnumerable<object> arr = MakeEnumerable(p.Apply(args[0], data));
+                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
                 return arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
-            AddOperator("merge", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate((IEnumerable<object>)new object[0], (acc, current) => {
+            AddOperator("merge", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate(new object[0], (acc, current) => {
                 try {
-                    return acc.Concat(MakeEnumerable(current));
+                    return acc.Concat(current.MakeEnumerable()).ToArray();
                 }
                 catch {
-                    return acc.Concat(new object[]{ current });
+                    return acc.Concat(new object[]{ current }).ToArray();
                 }
             }));
 
@@ -182,7 +211,7 @@ namespace JsonLogic.Net
                 object haystack = p.Apply(args[1], data);
                 if (haystack is String) return (haystack as string).IndexOf(needle.ToString()) >= 0;
 
-                return MakeEnumerable(haystack).Any(item => item.Equals(needle));
+                return haystack.MakeEnumerable().Any(item => item.Equals(needle));
             });
 
             AddOperator("cat", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate("", (acc, current) => acc + current.ToString()));
@@ -190,9 +219,15 @@ namespace JsonLogic.Net
             AddOperator("substr", (p, args, data) => {
                 string value = p.Apply(args[0], data).ToString();
                 int start = Convert.ToInt32(p.Apply(args[1], data));
-                if (start < 0) start += value.Length;
-                int length = (args.Count() == 2) ? value.Length - start : Convert.ToInt32(p.Apply(args[2], data));
-                return value.Substring(start, length);
+                while (start < 0) start += value.Length;
+                if (args.Count() == 2) return value.Substring(start);
+
+                int length = Convert.ToInt32(p.Apply(args[2], data));
+                if (length >= 0) return value.Substring(start, length);
+
+                int end = length;
+                while (end < 0) end += value.Length;
+                return value.Substring(start, end - start);
             });
 
             AddOperator("log", (p, args, data) => {
@@ -202,18 +237,11 @@ namespace JsonLogic.Net
             });
         }
 
-        private IEnumerable<object> MakeEnumerable(object value)
-        {
-            if (value is Array) return (value as Array).Cast<object>();
-
-            if (value is IEnumerable<object>) return (value as IEnumerable<object>);
-
-            throw new ArgumentException("Argument is not enumerable");
-        }
-
         private object GetValueByName(object data, string namePath)
         {
             if (string.IsNullOrEmpty(namePath)) return data;
+
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
             string[] names = namePath.Split('.');
             object d = data;
@@ -255,14 +283,9 @@ namespace JsonLogic.Net
             };
         }
 
-        private static bool IsEnumerable(object d)
+        private static Func<IProcessJsonLogic, JToken[], object, object> ReduceDoubleArgs(double defaultValue, Func<double, double, double> reducer)
         {
-            return d.GetType().IsArray || (d as IEnumerable<object>) != null;
-        }
-
-        private static Func<IProcessJsonLogic, JToken[], object, object> ReduceDoubleArgs(Func<double, double, double> reducer)
-        {
-            return (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Select(a => a == null ? 0d : Convert.ToDouble(a)).Aggregate(reducer);
+            return (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Select(a => a == null ? defaultValue : Convert.ToDouble(a)).Aggregate(reducer);
         }
 
         private static IEnumerable<object> Min2From(IEnumerable<object> source) 

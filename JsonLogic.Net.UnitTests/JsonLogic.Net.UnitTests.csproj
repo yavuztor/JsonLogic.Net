@@ -17,4 +17,7 @@
     <ProjectReference Include="..\JsonLogic.Net\JsonLogic.Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="tests.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

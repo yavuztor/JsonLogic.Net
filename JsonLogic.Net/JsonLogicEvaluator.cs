@@ -18,8 +18,8 @@ namespace JsonLogic.Net
         public object Apply(JToken rule, object data)
         {
             if (rule is null) return null;
-            if (rule is JValue) return (rule as JValue).Value;
-            if (rule is JArray) return (rule as JArray).Select(r => Apply(r, data));
+            if (rule is JValue) return AdjustType((rule as JValue).Value);
+            if (rule is JArray) return (rule as JArray).Select(r => Apply(r, data)).ToArray();
 
             var ruleObj = (JObject) rule;
             var p = ruleObj.Properties().First();
@@ -29,5 +29,9 @@ namespace JsonLogic.Net
             return op(this, opArgs, data);
         }
 
+        private object AdjustType(object value)
+        {
+            return value.IsNumeric() ? Convert.ToDouble(value) : value;
+        }
     }
 }

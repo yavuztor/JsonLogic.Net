@@ -4,11 +4,10 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Sdk;
 
-namespace JsonLogic.Net.UnitTests
-{
-    public class JsonLogicTests
-    {
+namespace JsonLogic.Net.UnitTests {
+    public class JsonLogicTests {
         public static object data = Dynamic(d => {
             d.name = "John Doe";
             d.address = Dynamic(a => {
@@ -16,7 +15,8 @@ namespace JsonLogic.Net.UnitTests
                 a.city = "Gotham";
                 a.zip = "33333";
             });
-            d.luckyNumbers= new int[]{ 3, 5, 7 };
+            d.luckyNumbers = new int[] { 3, 5, 7 };
+            d.items = new object[0];
         });
 
         [Theory]
@@ -46,12 +46,12 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`-`: [1.5, 0.3]}", 1.2d)]
         [InlineData("{`-`: 2}", -2d)]
         [InlineData("{`-`: -2}", 2d)]
-        
+
         [InlineData("{`*`: [0,0]}", 0d)]
         [InlineData("{`*`: [-1,1]}", -1d)]
         [InlineData("{`*`: [-2,1.5]}", -3d)]
         [InlineData("{`*`: [-2,-1.5]}", 3d)]
-        
+
         [InlineData("{`/`: [-3,-1.5]}", 2d)]
         [InlineData("{`/`: [-3,1.5]}", -2d)]
         [InlineData("{`/`: [2,0]}", double.PositiveInfinity)]
@@ -83,8 +83,8 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`var`: [`nonexistent`, `default-value`]}", "default-value")]
         [InlineData("{`var`: `luckyNumbers.1`}", 5)]
 
-        [InlineData("{`missing`:[`a`, `b`, `name`]}", new object[]{"a", "b"})]
-        [InlineData("{`missing_some`:[2, [`a`, `b`, `name`]]}", new object[]{"a", "b"})]
+        [InlineData("{`missing`:[`a`, `b`, `name`]}", new object[] { "a", "b" })]
+        [InlineData("{`missing_some`:[2, [`a`, `b`, `name`]]}", new object[] { "a", "b" })]
         [InlineData("{`missing_some`:[1, [`a`, `b`, `name`]]}", new object[0])]
 
         [InlineData("{`and`: [true, true]}", true)]
@@ -92,7 +92,7 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`and`: [false, true]}", false)]
         [InlineData("{`and`: [false, false]}", false)]
         [InlineData("{`and`: [{`==`: [5,5]}, {`<`: [3,5]}]}", true)]
-        
+
         [InlineData("{`or`: [true, true]}", true)]
         [InlineData("{`or`: [false, true]}", true)]
         [InlineData("{`or`: [true, false]}", true)]
@@ -104,19 +104,20 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`if`: [false, `yes`, true, `maybe`, `no`]}", "maybe")]
         [InlineData("{`if`: [true, `yes`, true, `maybe`, `no`]}", "yes")]
 
-        [InlineData("{`map`: [{`var`:`luckyNumbers`}, {`*`: [{`var`:``}, 3]} ]}", new object[]{9, 15, 21})]
-        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 5]} ]}", new object[]{7})]
-        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>=`: [{`var`:``}, 5]} ]}", new object[]{5, 7})]
+        [InlineData("{`map`: [{`var`:`luckyNumbers`}, {`*`: [{`var`:``}, 3]} ]}", new object[] { 9, 15, 21 })]
+        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 5]} ]}", new object[] { 7 })]
+        [InlineData("{`filter`: [{`var`:`luckyNumbers`}, {`>=`: [{`var`:``}, 5]} ]}", new object[] { 5, 7 })]
         [InlineData("{`reduce`: [{`var`:`luckyNumbers`}, {`+`: [{`var`:`current`}, {`var`:`accumulator`}]}, 10 ]}", 25d)]
         [InlineData("{`all`: [{`var`:`luckyNumbers`}, {`>`: [{`var`:``}, 1]} ]}", true)]
         [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 1]} ]}", true)]
         [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", false)]
         [InlineData("{`some`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", true)]
-        [InlineData("{`merge`:[ [1,2], [3,4] ]}", new object[]{1, 2, 3, 4})]
-        [InlineData("{`merge`:[ 1,2, [3,4] ]}", new object[]{1, 2, 3, 4})]
+        [InlineData("{`some`:[{`var`:`luckyNumbers`},{`==`:[{`var`:``},3]}]}", true)]
+        [InlineData("{`merge`:[ [1,2], [3,4] ]}", new object[] { 1, 2, 3, 4 })]
+        [InlineData("{`merge`:[ 1,2, [3,4] ]}", new object[] { 1, 2, 3, 4 })]
         [InlineData("{`in`:[ 1, [3,4,1] ]}", true)]
         [InlineData("{`in`:[ 2, [3,4,1] ]}", false)]
-        
+
         [InlineData("{`in`: [`Spring`, `Springfield`]}", true)]
         [InlineData("{`in`: [`Springs`, `Springfield`]}", false)]
         [InlineData("{`in`: [`spring`, `Springfield`]}", false)]
@@ -125,12 +126,13 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`substr`: [`springfield`, 6, 3]}", "fie")]
         [InlineData("{`substr`: [`springfield`, -3]}", "eld")]
         [InlineData("{`log`: `apple`}", "apple")]
-        public void Apply(string argsJson, object expectedResult) 
-        {
+
+        [InlineData("{`all`:[{`var`:`items`},{`>=`:[{`var`:`qty`},1]}]}", false)]
+        public void Apply(string argsJson, object expectedResult) {
             // Arrange
-            var rules = JsonFrom( argsJson );
+            var rules = JsonFrom(argsJson);
             var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
-            
+
             // Act
             var result = jsonLogic.Apply(rules, data);
 
@@ -139,66 +141,115 @@ namespace JsonLogic.Net.UnitTests
                 string[] expectedResultArr = (expectedResult as Array).Cast<object>().Select(i => i.ToString()).ToArray();
                 string[] resultArr;
 
-                if (result is Array) 
+                if (result is Array)
                     resultArr = (result as Array).Cast<object>().Select(i => i.ToString()).ToArray();
-                else if (result is IEnumerable<object>) 
+                else if (result is IEnumerable<object>)
                     resultArr = (result as IEnumerable<object>).Select(i => i.ToString()).ToArray();
-                else 
+                else
                     throw new Exception("Cannot cast resultArr");
-                
+
                 Assert.Equal(expectedResultArr, resultArr);
-            }
-            else {
+            } else {
                 Assert.Equal(expectedResult, result);
             }
         }
 
         [Theory]
         [InlineData("{`-`: [2,`something`]}", typeof(FormatException))]
-        public void ApplyThrowsException(string rulesJson, Type exceptionType)
-        {
+        public void ApplyThrowsException(string rulesJson, Type exceptionType) {
             // Arrange
             var rules = JsonFrom(rulesJson);
             var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
             object result = null;
-            
+
             // Act & Assert
             try {
                 result = jsonLogic.Apply(rules, data);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Assert.True(exceptionType.IsAssignableFrom(e.GetType()));
-            }
-            finally {
+            } finally {
                 Assert.Equal(null, result);
             }
         }
 
         [Fact]
-        public void SimpleUseCase()
-        {
+        public void SimpleUseCase() {
             // Arrange
-            string jsonText="{\">\": [{\"var\": \"MyNumber\"}, 3]}";
+            string jsonText = "{\">\": [{\"var\": \"MyNumber\"}, 3]}";
             var rule = JObject.Parse(jsonText);
-            object data = new {MyNumber = 8};
+            object data = new { MyNumber = 8 };
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
-            
+
             // Act
             var result = evaluator.Apply(rule, data);
-            
+
             // Assert
-            Assert.True((bool)result);
+            Assert.True((bool) result);
         }
+
+        [Fact]
+        public void PassesJsonLogicTests() {
+            // Arrange
+            var tests = JArray.Parse(System.IO.File.ReadAllText("tests.json"));
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            var results = tests.Where(t => t is JArray).Select(t => {
+                var test = t as JArray;
+                var rule = test[0];
+                object data = GetDataObject(test[1]);
+                var expectedResult = GetDataObject(test[2]);
+                object result = null;
+                
+                try {
+                    result = evaluator.Apply(rule, data);
+                    Assert.Equal(expectedResult, result);
+                    return (null, null, null);
+                } catch (Exception e) {
+                    return (test, result, e);
+                }
+            });
+
+            // Act
+            var failures = results.Where(t => t.Item1 != null);
+
+            // Assert
+            Console.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Item1.ToString(Formatting.None) + " -> " + f.Item3.ToString())));
+            Assert.Equal(0, failures.Count());
+        }
+
+        private object GetDataObject(JToken token)
+        {
+            if (token is JValue) return CastPrimitive((token as JValue).Value);
+            if (token is JArray) return (token as JArray).Select(t => GetDataObject(t)).ToArray();
+            if (token is JObject) return (token as JObject).Properties().Aggregate(new Dictionary<string, object>(), (d, p) => { 
+                d.Add(p.Name, GetDataObject(p.Value)); 
+                return d;
+            });
+            throw new Exception("GetDataObject cannot handle token " + token.ToString());
+        }
+
+        private object CastPrimitive(object value) 
+        {
+            if (value is int || value is short || value is long || value is double || value is float || value is decimal) return Convert.ToDouble(value);
+            return value;
+        }
+
+        private object GetValue(JToken token) {
+            if (token is JValue) return (token as JValue).Value;
+            if (token is JArray) return (token as JArray).ToArray();
+            if (token is JObject) return (token as JObject).ToObject<dynamic>();
+            throw new Exception("Cannot get value of this token: " + token.ToString(Formatting.None));
+        }
+
         public static JObject JsonFrom(string input) {
             return JObject.Parse(input.Replace('`', '"'));
         }
 
-        public static object Dynamic(Action<dynamic> ctor) 
-        {
+        public static object Dynamic(Action<dynamic> ctor) {
             var value = new System.Dynamic.ExpandoObject();
             ctor(value);
             return value;
         }
     }
-    
+
 }
