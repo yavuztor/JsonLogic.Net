@@ -91,7 +91,7 @@ namespace JsonLogic.Net
                 {
                     return GetValueByName(data, names.ToString());
                 }
-                catch (Exception e) 
+                catch 
                 {
                     object defaultValue = (args.Count() == 2) ? p.Apply(args.Last(), data) : null;
                     return defaultValue;
