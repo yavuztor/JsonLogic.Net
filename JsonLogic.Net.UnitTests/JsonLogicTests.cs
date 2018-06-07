@@ -168,7 +168,7 @@ namespace JsonLogic.Net.UnitTests {
             } catch (Exception e) {
                 Assert.True(exceptionType.IsAssignableFrom(e.GetType()));
             } finally {
-                Assert.Equal(null, result);
+                Assert.Null(result);
             }
         }
 
@@ -214,7 +214,7 @@ namespace JsonLogic.Net.UnitTests {
 
             // Assert
             Console.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Item1.ToString(Formatting.None) + " -> " + f.Item3.ToString())));
-            Assert.Equal(0, failures.Count());
+            Assert.Empty(failures);
         }
 
         private object GetDataObject(JToken token)

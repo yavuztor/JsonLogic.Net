@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json.Linq;
 
 namespace JsonLogic.Net 
@@ -232,7 +233,7 @@ namespace JsonLogic.Net
 
             AddOperator("log", (p, args, data) => {
                 object value = p.Apply(args[0], data);
-                Console.WriteLine(value);
+                System.Diagnostics.Debug.WriteLine(value);
                 return value;
             });
         }
@@ -252,11 +253,11 @@ namespace JsonLogic.Net
                 {
                     d = (d as Array).GetValue(int.Parse(name));
                 }
-                else if (typeof(IEnumerable<object>).IsAssignableFrom(d.GetType())) 
+                else if (d is IEnumerable<object>) 
                 {
                     d = (d as IEnumerable<object>).Skip(int.Parse(name)).First();
                 }
-                else if (typeof(IDictionary<string, object>).IsAssignableFrom(d.GetType()))
+                else if (d is IDictionary<string, object>)
                 {
                     var dict = (d as IDictionary<string, object>);
                     if (!dict.ContainsKey(name)) throw new Exception();
@@ -264,7 +265,7 @@ namespace JsonLogic.Net
                 }
                 else 
                 {
-                    var property = d.GetType().GetProperty(name);
+                    var property = d.GetType().GetTypeInfo().GetDeclaredProperty(name);
                     if (property == null) throw new Exception();
                     d = property.GetValue(d);
                 }
