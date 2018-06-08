@@ -188,6 +188,20 @@ namespace JsonLogic.Net.UnitTests {
         }
 
         [Fact]
+        public void ConjunctExpression() {
+            // Arrange
+            string dataJson = "{ `temp` : 100, `pie` : { `filling` : `apple` } }".Replace('`', '"');
+            string ruleJson = "{ `and` : [  {`<` : [ { `var` : `temp` }, 110 ]},  {`==` : [ { `var` : `pie.filling` }, `apple` ] }] }".Replace('`', '"');
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            // Act
+            var result = evaluator.Apply(JObject.Parse(ruleJson), JObject.Parse(dataJson));
+
+            // Assert
+            Assert.True((bool) result);
+        }
+
+        [Fact]
         public void PassesJsonLogicTests() {
             // Arrange
             var tests = JArray.Parse(System.IO.File.ReadAllText("tests.json"));

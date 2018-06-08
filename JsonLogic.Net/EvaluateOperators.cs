@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -253,15 +254,15 @@ namespace JsonLogic.Net
                 {
                     d = (d as Array).GetValue(int.Parse(name));
                 }
+                else if (DictionaryType(d) != null)
+                {
+                    var type = DictionaryType(d);
+                    var prop = type.GetTypeInfo().DeclaredProperties.FirstOrDefault(p => p.Name == "Item");
+                    d = prop.GetValue(d, new object[]{ name });
+                }
                 else if (d is IEnumerable<object>) 
                 {
                     d = (d as IEnumerable<object>).Skip(int.Parse(name)).First();
-                }
-                else if (d is IDictionary<string, object>)
-                {
-                    var dict = (d as IDictionary<string, object>);
-                    if (!dict.ContainsKey(name)) throw new Exception();
-                    d = dict[name];
                 }
                 else 
                 {
@@ -272,6 +273,16 @@ namespace JsonLogic.Net
             }
             return d;
         }
+
+        private Type DictionaryType(object d)
+        {
+            return d.GetType().GetTypeInfo().ImplementedInterfaces.FirstOrDefault(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+        }
+
+        // private Type EnumerableType(object d)
+        // {
+        //     return d.GetType().GetTypeInfo().ImplementedInterfaces.FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        // }
 
         private Func<IProcessJsonLogic, JToken[], object, object> DoubleArgsSatisfy(Func<double, double, bool> criteria)
         {
