@@ -166,7 +166,7 @@ namespace JsonLogic.Net.UnitTests {
             try {
                 result = jsonLogic.Apply(rules, data);
             } catch (Exception e) {
-                Assert.True(exceptionType.IsAssignableFrom(e.GetType()));
+                Assert.Equal(exceptionType, e.GetType());
             } finally {
                 Assert.Null(result);
             }
@@ -217,17 +217,17 @@ namespace JsonLogic.Net.UnitTests {
                 try {
                     result = evaluator.Apply(rule, data);
                     Assert.Equal(expectedResult, result);
-                    return (null, null, null);
+                    return new TestDef(null, null, null);
                 } catch (Exception e) {
-                    return (test, result, e);
+                    return new TestDef(test, result, e);
                 }
             });
 
             // Act
-            var failures = results.Where(t => t.Item1 != null);
+            var failures = results.Where(t => t.Test != null);
 
             // Assert
-            Console.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Item1.ToString(Formatting.None) + " -> " + f.Item3.ToString())));
+            Console.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Test.ToString(Formatting.None) + " -> " + f.Expected.ToString())));
             Assert.Empty(failures);
         }
 
@@ -264,6 +264,22 @@ namespace JsonLogic.Net.UnitTests {
             ctor(value);
             return value;
         }
+    }
+
+    internal class TestDef 
+    {
+        public TestDef(JToken test, object result, object expected)
+        {
+            this.Test = test;
+            this.Result = result;
+            this.Expected = expected;
+        }
+
+        public object Expected { get; private set; }
+
+        public object Result { get; private set; }
+
+        public JToken Test { get; private set; }
     }
 
 }
