@@ -188,6 +188,23 @@ namespace JsonLogic.Net.UnitTests {
         }
 
         [Fact]
+        public void Issue2_Var_In_With_JObject()
+        {
+            // Arrange
+            string ruleJson = "{`in`:[{`var`:`marital_status`},[`Single`,`Married`,`Divorced`,`Widowed`,`Separated`]]}".Replace('`', '"');
+            string dataJson = "{`marital_status`: `Divorced`}".Replace('`', '"');
+            var rule = JObject.Parse(ruleJson);
+            var data = JObject.Parse(dataJson);
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            // Act
+            var result = evaluator.Apply(rule, data);
+
+            // Assert
+            Assert.True((bool) result);
+        }
+
+        [Fact]
         public void ConjunctExpression() {
             // Arrange
             string dataJson = "{ `temp` : 100, `pie` : { `filling` : `apple` } }".Replace('`', '"');

@@ -213,7 +213,7 @@ namespace JsonLogic.Net
                 object haystack = p.Apply(args[1], data);
                 if (haystack is String) return (haystack as string).IndexOf(needle.ToString()) >= 0;
 
-                return haystack.MakeEnumerable().Any(item => item.Equals(needle));
+                return haystack.MakeEnumerable().Any(item => item.EqualTo(needle));
             });
 
             AddOperator("cat", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate("", (acc, current) => acc + current.ToString()));
