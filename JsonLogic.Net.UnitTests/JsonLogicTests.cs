@@ -248,6 +248,60 @@ namespace JsonLogic.Net.UnitTests {
             Assert.Empty(failures);
         }
 
+        [Fact]
+        public void Issue3_FilterBehaviorTest()
+        {
+            var data = JsonConvert.DeserializeObject(@"[
+                {
+                    `Prop1`: {
+                    `PropA`: 5
+                    },
+                    `Prop2`: {
+                    `PropB`: 18
+                    }
+                },
+                {
+                    `Prop1`: {
+                    `PropA`: 1
+                    },
+                    `Prop2`: {
+                    `PropB`: 35
+                    }
+                }
+            ]".Replace('`', '"'));
+
+            var rules = JObject.Parse(@"{
+                `filter`: [
+                    { `var`: `` },
+                    {
+                    `and`: [
+                        {
+                        `>=`: [
+                            { `var`: `Prop1.PropA` },
+                        1
+                        ]
+                        },
+                        {
+                        `>=`: [
+                            { `var`: `Prop2.PropB` },
+                            19
+                        ]
+                        }
+                    ]
+                    }
+                ]
+                }".Replace('`', '"'));
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            // Act
+            var result = evaluator.Apply(rules, data);
+
+            // Assert
+            Assert.Equal((result as object[]).Length, 1);
+            
+
+        }
+
         private object GetDataObject(JToken token)
         {
             if (token is JValue) return CastPrimitive((token as JValue).Value);
