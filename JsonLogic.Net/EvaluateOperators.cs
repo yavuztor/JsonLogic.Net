@@ -95,7 +95,9 @@ namespace JsonLogic.Net
                     // This will return JValue or null if missing. Actual value of null will be wrapped in JToken with value null
                     if (result is JValue)
                     {
-                        result = ((JValue) result).Value;
+                        // permit correct type wrangling to occur (AdjustType) without duplicating code
+                        result = p.Apply((JValue)result, null);
+                        
                     }
                     else if (result == null && args.Count() == 2)
                     {
@@ -181,7 +183,7 @@ namespace JsonLogic.Net
 
             AddOperator("filter", (p, args, data) => {
                 IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
-                return arr.Where(item => Convert.ToBoolean(p.Apply(args[1], item))).ToArray();
+                return arr.Where(item => p.Apply(args[1], item).IsTruthy()).ToArray();
             });
 
             AddOperator("reduce", (p, args, data) => {

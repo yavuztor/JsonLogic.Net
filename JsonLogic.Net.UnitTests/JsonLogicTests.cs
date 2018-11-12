@@ -248,8 +248,9 @@ namespace JsonLogic.Net.UnitTests {
             string ruleJson = "{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}".Replace('`', '"');
             string expectedJson = "[{`childArray`:[5,6,7,8],`childItem`:`c`}]".Replace('`', '"');
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
-            var rule = JObject.Parse(ruleJson);
-            var localData = JObject.Parse(dataJson);
+            var rule = JsonFrom(ruleJson);
+            var localData = JsonFrom(dataJson);
+            var expectedResult = JsonFrom(expectedJson);
 
             _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
 
@@ -257,7 +258,7 @@ namespace JsonLogic.Net.UnitTests {
             var result = evaluator.Apply(rule, localData);
 
             // Assert
-            Assert.Equal(GetDataObject(expectedJson), result);
+            Assert.Equal(expectedResult, result);
         }
 
 
