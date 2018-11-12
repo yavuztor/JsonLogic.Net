@@ -43,11 +43,11 @@ namespace JsonLogic.Net
         {
             AddOperator("==", (p, args, data) => p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
             
-            AddOperator("===", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("===", (p, args, data) => p.Apply(args[0], data).StrictEqualTo(p.Apply(args[1], data)));
 
             AddOperator("!=", (p, args, data) => !p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
 
-            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).StrictEqualTo(p.Apply(args[1], data)));
 
             AddOperator("+", (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Aggregate((prev, next) =>
             {

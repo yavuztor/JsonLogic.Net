@@ -219,6 +219,56 @@ namespace JsonLogic.Net.UnitTests {
         }
 
         [Fact]
+        public void NestedFilterVariableAccess()
+        {
+            // Arrange
+            string dataJson = "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}".Replace('`', '"');
+            string ruleJson = "{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}".Replace('`', '"');
+            string expectedJson = "[{`childArray`:[5,6,7,8],`childItem`:`c`}]".Replace('`', '"');
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            // Act
+            var result = evaluator.Apply(JObject.Parse(ruleJson), JObject.Parse(dataJson));
+
+            // Assert
+            Assert.Equal(GetDataObject(expectedJson), result);
+        }
+
+
+        [Theory]
+        [InlineData("{`==`: [1,`1`]}", true)]
+        [InlineData("{`===`: [1,`1`]}", false)]
+        [InlineData("{`==`: [1,1]}", true)]
+        [InlineData("{`===`: [1,1]}", true)]
+        [InlineData("{`==`: [1,2]}", false)]
+        [InlineData("{`===`: [1,2]}", false)]
+        [InlineData("{`==`: [1,null]}", false)]
+        [InlineData("{`===`: [1,null]}", false)]
+        [InlineData("{`==`: [null,null]}", true)]
+        [InlineData("{`===`: [null,null]}", true)]
+        [InlineData("{`!=`: [1,`1`]}", false)]
+        [InlineData("{`!==`: [1,`1`]}", true)]
+        [InlineData("{`!=`: [1,1]}", false)]
+        [InlineData("{`!==`: [1,1]}", false)]
+        [InlineData("{`!=`: [1,2]}", true)]
+        [InlineData("{`!==`: [1,2]}", true)]
+        [InlineData("{`!=`: [1,null]}", true)]
+        [InlineData("{`!==`: [1,null]}", true)]
+        [InlineData("{`!=`: [null,null]}", false)]
+        [InlineData("{`!==`: [null,null]}", false)]
+        public void EqualityAndInequalityHandling(string ruleJson, object expectedResult)
+        {
+            var rule = JsonFrom(ruleJson);
+            var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            // Act
+            var actualResult = jsonLogic.Apply(rule, data);
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+
+
+        [Fact]
         public void PassesJsonLogicTests() {
             // Arrange
             var tests = JArray.Parse(System.IO.File.ReadAllText("tests.json"));

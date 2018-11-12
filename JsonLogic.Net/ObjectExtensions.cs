@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace JsonLogic.Net 
 {
@@ -29,8 +30,27 @@ namespace JsonLogic.Net
             if (value.IsNumeric() && other.IsNumeric())
                 return Convert.ToDouble(value).Equals(Convert.ToDouble(other));
 
+            // special handling for nulls to avoid NullReferenceException
+            if (value == null)
+            {
+                return other == null;
+            }
+
             return value.Equals(other);
         }
+
+
+        /// <summary>
+        /// Equivalent to JavaScript "===" comparer. 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static bool StrictEqualTo(this object value, object other)
+        {
+            return value == null || other == null ? value == other : value.Equals(other);
+        }
+
 
         public static bool IsNumeric(this object value) 
         {
