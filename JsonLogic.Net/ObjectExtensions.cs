@@ -27,7 +27,7 @@ namespace JsonLogic.Net
             if (value is string || other is string) 
                 return Convert.ToString(value).Equals(Convert.ToString(other));
             
-            if (value.IsNumeric() && other.IsNumeric())
+            if ((value.IsNumeric() || value is bool) && (other.IsNumeric() || other is bool))
                 return Convert.ToDouble(value).Equals(Convert.ToDouble(other));
 
             // special handling for nulls to avoid NullReferenceException

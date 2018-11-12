@@ -368,6 +368,23 @@ namespace JsonLogic.Net.UnitTests
         }
 
 
+        [Theory]
+        [JsonFileTestDefinitionAttribute("jsonlogic.com_tests.json")]
+        public void PassesJsonLogicDotComTests(string ruleJson, string dataJson, string expectedJson)
+        {
+            var rule = JsonFrom(ruleJson);
+            var data = GetDataObject(JsonFrom(dataJson));
+            var expected = GetDataObject(JsonFrom(expectedJson));
+
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {data}");
+
+            var result = evaluator.Apply(rule, data);
+            Assert.Equal(expected, result);
+        }
+
+
         [Fact]
         public void Issue3_FilterBehaviorTest()
         {

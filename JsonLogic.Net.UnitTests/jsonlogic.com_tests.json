@@ -1,0 +1,1105 @@
+[
+  "These tests were automatically harvested from http://jsonlogic.com/operations.html",
+  [
+    {
+      "var": [
+        "a"
+      ]
+    },
+    {
+      "a": 1,
+      "b": 2
+    },
+    1
+  ],
+  [
+    {
+      "var": "a"
+    },
+    {
+      "a": 1,
+      "b": 2
+    },
+    1
+  ],
+  [
+    {
+      "var": [
+        "z",
+        26
+      ]
+    },
+    {
+      "a": 1,
+      "b": 2
+    },
+    26
+  ],
+  [
+    {
+      "var": "champ.name"
+    },
+    {
+      "champ": {
+        "name": "Fezzig",
+        "height": 223
+      },
+      "challenger": {
+        "name": "Dread Pirate Roberts",
+        "height": 183
+      }
+    },
+    "Fezzig"
+  ],
+  [
+    {
+      "var": 1
+    },
+    [
+      "zero",
+      "one",
+      "two"
+    ],
+    "one"
+  ],
+  [
+    {
+      "and": [
+        {
+          "<": [
+            {
+              "var": "temp"
+            },
+            110
+          ]
+        },
+        {
+          "==": [
+            {
+              "var": "pie.filling"
+            },
+            "apple"
+          ]
+        }
+      ]
+    },
+    {
+      "temp": 100,
+      "pie": {
+        "filling": "apple"
+      }
+    },
+    true
+  ],
+  [
+    {
+      "cat": [
+        "Hello, ",
+        {
+          "var": ""
+        }
+      ]
+    },
+    "Dolly",
+    "Hello, Dolly"
+  ],
+  [
+    {
+      "missing": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "a": "apple",
+      "c": "carrot"
+    },
+    [
+      "b"
+    ]
+  ],
+  [
+    {
+      "missing": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "a": "apple",
+      "b": "banana"
+    },
+    []
+  ],
+  [
+    {
+      "if": [
+        {
+          "missing": [
+            "a",
+            "b"
+          ]
+        },
+        "Not enough fruit",
+        "OK to proceed"
+      ]
+    },
+    {
+      "a": "apple",
+      "b": "banana"
+    },
+    "OK to proceed"
+  ],
+  [
+    {
+      "missing_some": [
+        1,
+        [
+          "a",
+          "b",
+          "c"
+        ]
+      ]
+    },
+    {
+      "a": "apple"
+    },
+    []
+  ],
+  [
+    {
+      "missing_some": [
+        2,
+        [
+          "a",
+          "b",
+          "c"
+        ]
+      ]
+    },
+    {
+      "a": "apple"
+    },
+    [
+      "b",
+      "c"
+    ]
+  ],
+  [
+    {
+      "if": [
+        {
+          "merge": [
+            {
+              "missing": [
+                "first_name",
+                "last_name"
+              ]
+            },
+            {
+              "missing_some": [
+                1,
+                [
+                  "cell_phone",
+                  "home_phone"
+                ]
+              ]
+            }
+          ]
+        },
+        "We require first name, last name, and one phone number.",
+        "OK to proceed"
+      ]
+    },
+    {
+      "first_name": "Bruce",
+      "last_name": "Wayne"
+    },
+    "We require first name, last name, and one phone number."
+  ],
+  [
+    {
+      "if": [
+        true,
+        "yes",
+        "no"
+      ]
+    },
+    null,
+    "yes"
+  ],
+  [
+    {
+      "if": [
+        false,
+        "yes",
+        "no"
+      ]
+    },
+    null,
+    "no"
+  ],
+  [
+    {
+      "if": [
+        {
+          "<": [
+            {
+              "var": "temp"
+            },
+            0
+          ]
+        },
+        "freezing",
+        {
+          "<": [
+            {
+              "var": "temp"
+            },
+            100
+          ]
+        },
+        "liquid",
+        "gas"
+      ]
+    },
+    {
+      "temp": 55
+    },
+    "liquid"
+  ],
+  [
+    {
+      "==": [
+        1,
+        1
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "==": [
+        1,
+        "1"
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "==": [
+        0,
+        false
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "===": [
+        1,
+        1
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "===": [
+        1,
+        "1"
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "!=": [
+        1,
+        2
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "!=": [
+        1,
+        "1"
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "!==": [
+        1,
+        2
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "!==": [
+        1,
+        "1"
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "!": [
+        true
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "!": true
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "!!": [
+        []
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "!!": [
+        "0"
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "or": [
+        true,
+        false
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "or": [
+        false,
+        true
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "or": [
+        false,
+        "a"
+      ]
+    },
+    null,
+    "a"
+  ],
+  [
+    {
+      "or": [
+        false,
+        0,
+        "a"
+      ]
+    },
+    null,
+    "a"
+  ],
+  [
+    {
+      "and": [
+        true,
+        true
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "and": [
+        true,
+        false
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "and": [
+        true,
+        "a",
+        3
+      ]
+    },
+    null,
+    3
+  ],
+  [
+    {
+      "and": [
+        true,
+        "",
+        3
+      ]
+    },
+    null,
+    ""
+  ],
+  [
+    {
+      ">": [
+        2,
+        1
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      ">=": [
+        1,
+        1
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<": [
+        1,
+        2
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<=": [
+        1,
+        1
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<": [
+        1,
+        2,
+        3
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<": [
+        1,
+        1,
+        3
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "<": [
+        1,
+        4,
+        3
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "<=": [
+        1,
+        2,
+        3
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<=": [
+        1,
+        1,
+        3
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "<=": [
+        1,
+        4,
+        3
+      ]
+    },
+    null,
+    false
+  ],
+  [
+    {
+      "<": [
+        0,
+        {
+          "var": "temp"
+        },
+        100
+      ]
+    },
+    {
+      "temp": 37
+    },
+    true
+  ],
+  [
+    {
+      "max": [
+        1,
+        2,
+        3
+      ]
+    },
+    null,
+    3
+  ],
+  [
+    {
+      "min": [
+        1,
+        2,
+        3
+      ]
+    },
+    null,
+    1
+  ],
+  [
+    {
+      "+": [
+        4,
+        2
+      ]
+    },
+    null,
+    6
+  ],
+  [
+    {
+      "-": [
+        4,
+        2
+      ]
+    },
+    null,
+    2
+  ],
+  [
+    {
+      "*": [
+        4,
+        2
+      ]
+    },
+    null,
+    8
+  ],
+  [
+    {
+      "/": [
+        4,
+        2
+      ]
+    },
+    null,
+    2
+  ],
+  [
+    {
+      "+": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    null,
+    10
+  ],
+  [
+    {
+      "*": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    null,
+    32
+  ],
+  [
+    {
+      "-": 2
+    },
+    null,
+    -2
+  ],
+  [
+    {
+      "-": -2
+    },
+    null,
+    2
+  ],
+  [
+    {
+      "+": "3.14"
+    },
+    null,
+    3.14
+  ],
+  [
+    {
+      "%": [
+        101,
+        2
+      ]
+    },
+    null,
+    1
+  ],
+  [
+    {
+      "map": [
+        {
+          "var": "integers"
+        },
+        {
+          "*": [
+            {
+              "var": ""
+            },
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "integers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    [
+      2,
+      4,
+      6,
+      8,
+      10
+    ]
+  ],
+  [
+    {
+      "filter": [
+        {
+          "var": "integers"
+        },
+        {
+          "%": [
+            {
+              "var": ""
+            },
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "integers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    [
+      1,
+      3,
+      5
+    ]
+  ],
+  [
+    {
+      "reduce": [
+        {
+          "var": "integers"
+        },
+        {
+          "+": [
+            {
+              "var": "current"
+            },
+            {
+              "var": "accumulator"
+            }
+          ]
+        },
+        0
+      ]
+    },
+    {
+      "integers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    15
+  ],
+  [
+    {
+      "all": [
+        [
+          1,
+          2,
+          3
+        ],
+        {
+          ">": [
+            {
+              "var": ""
+            },
+            0
+          ]
+        }
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "some": [
+        [
+          -1,
+          0,
+          1
+        ],
+        {
+          ">": [
+            {
+              "var": ""
+            },
+            0
+          ]
+        }
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "none": [
+        [
+          -3,
+          -2,
+          -1
+        ],
+        {
+          ">": [
+            {
+              "var": ""
+            },
+            0
+          ]
+        }
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "some": [
+        {
+          "var": "pies"
+        },
+        {
+          "==": [
+            {
+              "var": "filling"
+            },
+            "apple"
+          ]
+        }
+      ]
+    },
+    {
+      "pies": [
+        {
+          "filling": "pumpkin",
+          "temp": 110
+        },
+        {
+          "filling": "rhubarb",
+          "temp": 210
+        },
+        {
+          "filling": "apple",
+          "temp": 310
+        }
+      ]
+    },
+    true
+  ],
+  [
+    {
+      "merge": [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ]
+    },
+    null,
+    [
+      1,
+      2,
+      3,
+      4
+    ]
+  ],
+  [
+    {
+      "merge": [
+        1,
+        2,
+        [
+          3,
+          4
+        ]
+      ]
+    },
+    null,
+    [
+      1,
+      2,
+      3,
+      4
+    ]
+  ],
+  [
+    {
+      "missing": {
+        "merge": [
+          "vin",
+          {
+            "if": [
+              {
+                "var": "financing"
+              },
+              [
+                "apr",
+                "term"
+              ],
+              []
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "financing": true
+    },
+    [
+      "vin",
+      "apr",
+      "term"
+    ]
+  ],
+  [
+    {
+      "missing": {
+        "merge": [
+          "vin",
+          {
+            "if": [
+              {
+                "var": "financing"
+              },
+              [
+                "apr",
+                "term"
+              ],
+              []
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "financing": false
+    },
+    [
+      "vin"
+    ]
+  ],
+  [
+    {
+      "in": [
+        "Ringo",
+        [
+          "John",
+          "Paul",
+          "George",
+          "Ringo"
+        ]
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "in": [
+        "Spring",
+        "Springfield"
+      ]
+    },
+    null,
+    true
+  ],
+  [
+    {
+      "cat": [
+        "I love",
+        " pie"
+      ]
+    },
+    null,
+    "I love pie"
+  ],
+  [
+    {
+      "cat": [
+        "I love ",
+        {
+          "var": "filling"
+        },
+        " pie"
+      ]
+    },
+    {
+      "filling": "apple",
+      "temp": 110
+    },
+    "I love apple pie"
+  ],
+  [
+    {
+      "substr": [
+        "jsonlogic",
+        4
+      ]
+    },
+    null,
+    "logic"
+  ],
+  [
+    {
+      "substr": [
+        "jsonlogic",
+        -5
+      ]
+    },
+    null,
+    "logic"
+  ],
+  [
+    {
+      "substr": [
+        "jsonlogic",
+        1,
+        3
+      ]
+    },
+    null,
+    "son"
+  ],
+  [
+    {
+      "substr": [
+        "jsonlogic",
+        4,
+        -2
+      ]
+    },
+    null,
+    "log"
+  ],
+  [
+    {
+      "log": "apple"
+    },
+    null,
+    "apple"
+  ]
+]
