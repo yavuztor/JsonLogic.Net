@@ -1,13 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace JsonLogic.Net.UnitTests {
     public class JsonLogicTests {
+        private readonly ITestOutputHelper _output;
+
+        public JsonLogicTests(ITestOutputHelper output)
+        {
+            this._output = output;
+        }
+
         public static object data = Dynamic(d => {
             d.name = "John Doe";
             d.address = Dynamic(a => {
@@ -133,6 +142,8 @@ namespace JsonLogic.Net.UnitTests {
             var rules = JsonFrom(argsJson);
             var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rules} against {data}");
+
             // Act
             var result = jsonLogic.Apply(rules, data);
 
@@ -162,8 +173,11 @@ namespace JsonLogic.Net.UnitTests {
             var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
             object result = null;
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rules} against {data}");
+
             // Act & Assert
-            try {
+            try
+            {
                 result = jsonLogic.Apply(rules, data);
             } catch (Exception e) {
                 Assert.Equal(exceptionType, e.GetType());
@@ -177,11 +191,13 @@ namespace JsonLogic.Net.UnitTests {
             // Arrange
             string jsonText = "{\">\": [{\"var\": \"MyNumber\"}, 3]}";
             var rule = JObject.Parse(jsonText);
-            object data = new { MyNumber = 8 };
+            object localData = new { MyNumber = 8 };
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
+
             // Act
-            var result = evaluator.Apply(rule, data);
+            var result = evaluator.Apply(rule, localData);
 
             // Assert
             Assert.True((bool) result);
@@ -194,11 +210,13 @@ namespace JsonLogic.Net.UnitTests {
             string ruleJson = "{`in`:[{`var`:`marital_status`},[`Single`,`Married`,`Divorced`,`Widowed`,`Separated`]]}".Replace('`', '"');
             string dataJson = "{`marital_status`: `Divorced`}".Replace('`', '"');
             var rule = JObject.Parse(ruleJson);
-            var data = JObject.Parse(dataJson);
+            var localData = JObject.Parse(dataJson);
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
+
             // Act
-            var result = evaluator.Apply(rule, data);
+            var result = evaluator.Apply(rule, localData);
 
             // Assert
             Assert.True((bool) result);
@@ -210,9 +228,13 @@ namespace JsonLogic.Net.UnitTests {
             string dataJson = "{ `temp` : 100, `pie` : { `filling` : `apple` } }".Replace('`', '"');
             string ruleJson = "{ `and` : [  {`<` : [ { `var` : `temp` }, 110 ]},  {`==` : [ { `var` : `pie.filling` }, `apple` ] }] }".Replace('`', '"');
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+            var rule = JObject.Parse(ruleJson);
+            var localData = JObject.Parse(dataJson);
+
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
 
             // Act
-            var result = evaluator.Apply(JObject.Parse(ruleJson), JObject.Parse(dataJson));
+            var result = evaluator.Apply(rule, localData);
 
             // Assert
             Assert.True((bool) result);
@@ -226,9 +248,13 @@ namespace JsonLogic.Net.UnitTests {
             string ruleJson = "{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}".Replace('`', '"');
             string expectedJson = "[{`childArray`:[5,6,7,8],`childItem`:`c`}]".Replace('`', '"');
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+            var rule = JObject.Parse(ruleJson);
+            var localData = JObject.Parse(dataJson);
+
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
 
             // Act
-            var result = evaluator.Apply(JObject.Parse(ruleJson), JObject.Parse(dataJson));
+            var result = evaluator.Apply(rule, localData);
 
             // Assert
             Assert.Equal(GetDataObject(expectedJson), result);
@@ -261,8 +287,42 @@ namespace JsonLogic.Net.UnitTests {
             var rule = JsonFrom(ruleJson);
             var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule}");
+
             // Act
             var actualResult = jsonLogic.Apply(rule, data);
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+
+        [Theory]
+        [InlineData("{`var`:`string`}", "{`string`:`a`}", "a")]
+        [InlineData("{`var`:[`string`]}", "{`string`:`a`}", "a")]
+        [InlineData("{`var`:`number`}", "{`number`:10.3}", 10.3)]
+        [InlineData("{`var`:[`number`]}", "{`number`:10.3}", 10.3)]
+        [InlineData("{`var`:`boolean`}", "{`boolean`:true}", true)]
+        [InlineData("{`var`:[`boolean`]}", "{`boolean`:true}", true)]
+        [InlineData("{`var`:`nullref`}", "{`nullref`:null}", null)]
+        [InlineData("{`var`:[`nullref`]}", "{`nullref`:null}", null)]
+        [InlineData("{`var`:[`nullrefWithDefaultString`,`a`]}", "{}", "a")]
+        [InlineData("{`var`:[`nullrefWithDefaultNumeric`,5.2]}", "{}", 5.2)]
+        [InlineData("{`var`:[`nullrefWithDefaultBoolean`,true]}", "{}", true)]
+        [InlineData("{`var`:`nested.variable`}", "{`nested`:{ `variable`: `alpha` }}", "alpha")]
+        [InlineData("{`var`:[`nested.variable`]}", "{`nested`:{ `variable`: `alpha` }}", "alpha")]
+        [InlineData("{`var`:3}", "[`a`,`b`,`c`,`d`]", "d")]
+        [InlineData("{`var`:`arrayByNumericIndexNested.2`}", "{`arrayByNumericIndexNested`: [`a`,`b`,`c`,`d`]}", "c")]
+        [InlineData("{`var`:[`nullValueWithDefault`,100]}", "{`nullValueWithDefault`:null}", null)]
+        [InlineData("{`var`:[100,`defaultValue`]}", "[`a`,`b`,`c`,`d`]", "defaultValue")]
+        [InlineData("{`var`:100}", "[`a`,`b`,`c`,`d`]", null)]
+        public void VariableHandling(string ruleJson, string dataJson, object expectedResult)
+        {
+            var rule = JsonFrom(ruleJson);
+            var localData = JsonFrom(dataJson);
+            var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
+            // Act
+            var actualResult = jsonLogic.Apply(rule, localData);
             Assert.Equal(expectedResult, actualResult);
         }
 
@@ -294,14 +354,14 @@ namespace JsonLogic.Net.UnitTests {
             var failures = results.Where(t => t.Test != null);
 
             // Assert
-            Console.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Test.ToString(Formatting.None) + " -> " + f.Expected.ToString())));
+            _output.WriteLine("Failures:\n\t" + string.Join("\n\n\t", failures.Select(f => f.Test.ToString(Formatting.None) + " -> " + f.Expected.ToString())));
             Assert.Empty(failures);
         }
 
         [Fact]
         public void Issue3_FilterBehaviorTest()
         {
-            var data = JsonConvert.DeserializeObject(@"[
+            var localData = JsonConvert.DeserializeObject(@"[
                 {
                     `Prop1`: {
                     `PropA`: 5
@@ -343,8 +403,10 @@ namespace JsonLogic.Net.UnitTests {
                 }".Replace('`', '"'));
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
 
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rules} against {localData}");
+
             // Act
-            var result = evaluator.Apply(rules, data);
+            var result = evaluator.Apply(rules, localData);
 
             // Assert
             Assert.Equal((result as object[]).Length, 1);
@@ -376,8 +438,8 @@ namespace JsonLogic.Net.UnitTests {
             throw new Exception("Cannot get value of this token: " + token.ToString(Formatting.None));
         }
 
-        public static JObject JsonFrom(string input) {
-            return JObject.Parse(input.Replace('`', '"'));
+        public static JToken JsonFrom(string input) {
+            return JToken.Parse(input.Replace('`', '"'));
         }
 
         public static object Dynamic(Action<dynamic> ctor) {

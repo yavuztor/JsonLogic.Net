@@ -91,7 +91,19 @@ namespace JsonLogic.Net
 
                 try 
                 {
-                    return GetValueByName(data, names.ToString());
+                    var result = GetValueByName(data, names.ToString());
+                    // This will return JValue or null if missing. Actual value of null will be wrapped in JToken with value null
+                    if (result is JValue)
+                    {
+                        result = ((JValue) result).Value;
+                    }
+                    else if (result == null && args.Count() == 2)
+                    {
+                        object defaultValue = p.Apply(args.Last(), data);
+                        result = defaultValue;
+                    }
+
+                    return result;
                 }
                 catch 
                 {
