@@ -259,21 +259,20 @@ namespace JsonLogic.Net.UnitTests
             Assert.True((bool) result);
         }
 
-        [Fact]
-        public void NestedFilterVariableAccess()
+        [Theory]
+        [InlineData("{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", "[{`childArray`:[5,6,7,8],`childItem`:`c`}]")]
+        [InlineData("{`filter`:[{`var`:`parentNonExistentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", "null")]
+        public void NestedFilterVariableAccess(string ruleJson, string dataJson, string expectedJson)
         {
             // Arrange
-            string dataJson =
-                "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}"
-                    .Replace('`', '"');
-            string ruleJson =
-                "{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}"
-                    .Replace('`', '"');
-            string expectedJson = "[{`childArray`:[5,6,7,8],`childItem`:`c`}]".Replace('`', '"');
+            dataJson = dataJson.Replace('`', '"');
+            ruleJson = ruleJson.Replace('`', '"');
+            expectedJson = expectedJson.Replace('`', '"');
+
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
             var rule = JsonFrom(ruleJson);
-            var localData = JsonFrom(dataJson);
-            var expectedResult = JsonFrom(expectedJson);
+            var localData = GetDataObject(JsonFrom(dataJson));
+            var expectedResult = GetDataObject(JsonFrom(expectedJson));
 
             _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
 

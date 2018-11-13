@@ -182,8 +182,9 @@ namespace JsonLogic.Net
             });
 
             AddOperator("filter", (p, args, data) => {
-                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
-                return arr.Where(item => p.Apply(args[1], item).IsTruthy()).ToArray();
+                // if first part fails to retrieve data, make enumerable will fail
+                IEnumerable<object> arr = p.Apply(args[0], data)?.MakeEnumerable();
+                return arr?.Where(item => p.Apply(args[1], item).IsTruthy()).ToArray();
             });
 
             AddOperator("reduce", (p, args, data) => {
