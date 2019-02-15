@@ -1,6 +1,6 @@
 #! /bin/bash
-PKGNAME=`dotnet pack | tail -1 | egrep -o "[^\/]+.nupkg"`
+rm JsonLogic.Net/bin/Debug/*.nupkg
+dotnet pack
+PKGNAME=`ls JsonLogic.Net/bin/Debug/*.nupkg`
 echo PKGNAME is $PKGNAME
-pushd JsonLogic.Net/bin/Debug
 dotnet nuget push $PKGNAME -k "$NUGET_KEY" -s "https://api.nuget.org/v3/index.json"
-popd
