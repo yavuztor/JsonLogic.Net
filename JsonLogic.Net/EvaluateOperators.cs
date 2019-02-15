@@ -287,7 +287,7 @@ namespace JsonLogic.Net
         private Func<IProcessJsonLogic, JToken[], object, object> DoubleArgsSatisfy(Func<double, double, bool> criteria)
         {
             return (p, args, data) => {
-                var values = args.Select(a => a == null ? 0d : Convert.ToDouble(p.Apply(a, data))).ToArray();
+                var values = args.Select(a => a == null ? 0d : Double.Parse(p.Apply(a, data).ToString())).ToArray();
                 for (int i = 1; i < values.Length; i++) {
                     if (!criteria(values[i-1], values[i])) return false;
                 }
