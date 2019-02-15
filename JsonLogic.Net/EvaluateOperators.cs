@@ -43,11 +43,11 @@ namespace JsonLogic.Net
         {
             AddOperator("==", (p, args, data) => p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
             
-            AddOperator("===", (p, args, data) => p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("===", (p, args, data) => p.Apply(args[0], data).StrictEqualTo(p.Apply(args[1], data)));
 
             AddOperator("!=", (p, args, data) => !p.Apply(args[0], data).EqualTo(p.Apply(args[1], data)));
 
-            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).Equals(p.Apply(args[1], data)));
+            AddOperator("!==", (p, args, data) => !p.Apply(args[0], data).StrictEqualTo(p.Apply(args[1], data)));
 
             AddOperator("+", (p, args, data) => Min2From(args.Select(a => p.Apply(a, data))).Aggregate((prev, next) =>
             {
@@ -91,7 +91,21 @@ namespace JsonLogic.Net
 
                 try 
                 {
-                    return GetValueByName(data, names.ToString());
+                    var result = GetValueByName(data, names.ToString());
+                    // This will return JValue or null if missing. Actual value of null will be wrapped in JToken with value null
+                    if (result is JValue)
+                    {
+                        // permit correct type wrangling to occur (AdjustType) without duplicating code
+                        result = p.Apply((JValue)result, null);
+                        
+                    }
+                    else if (result == null && args.Count() == 2)
+                    {
+                        object defaultValue = p.Apply(args.Last(), data);
+                        result = defaultValue;
+                    }
+
+                    return result;
                 }
                 catch 
                 {
@@ -168,8 +182,9 @@ namespace JsonLogic.Net
             });
 
             AddOperator("filter", (p, args, data) => {
-                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
-                return arr.Where(item => Convert.ToBoolean(p.Apply(args[1], item))).ToArray();
+                // if first part fails to retrieve data, make enumerable will fail
+                IEnumerable<object> arr = p.Apply(args[0], data)?.MakeEnumerable();
+                return arr?.Where(item => p.Apply(args[1], item).IsTruthy()).ToArray();
             });
 
             AddOperator("reduce", (p, args, data) => {
