@@ -2,18 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.0</TargetFrameworks>
-    <Version>1.1.5</Version>
+    <Version>1.1.6</Version>
     <Copyright>Copyright 2018</Copyright>
     <PackageLicenseUrl>https://raw.githubusercontent.com/yavuztor/JsonLogic.Net/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/yavuztor/JsonLogic.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/yavuztor/JsonLogic.Net</RepositoryUrl>
     <PackageTags>jsonlogic specification evaluator</PackageTags>
     <PackageReleaseNotes>
-1.0.0 - Passed all tests from JsonLogic.com
-1.1.2 - Added netstandard1.0 target to enable using the library from .net 4.5
-1.1.3 - Resolved equality check with "in" operator.
-1.1.4 - Dropped Newtonsoft.Json dependency to 9.x
-1.1.5 - Various fixes and improved testing.
+      https://github.com/yavuztor/JsonLogic.Net/blob/master/release-notes.md
     </PackageReleaseNotes>
     <Authors>Yavuz Tor</Authors>
     <Description>A .Net implementation of [JsonLogic](http://jsonlogic.com).</Description>

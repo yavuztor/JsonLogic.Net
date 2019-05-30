@@ -252,6 +252,13 @@ namespace JsonLogic.Net
                 System.Diagnostics.Debug.WriteLine(value);
                 return value;
             });
+
+            AddOperator("within", (p, args, data) => {
+                double first = Convert.ToDouble(p.Apply(args[0], data));
+                double second = Convert.ToDouble(p.Apply(args[1], data));
+                double precision = Convert.ToDouble(p.Apply(args[2], data));
+                return Math.Abs(first - second) <= precision;
+            });
         }
 
         private object GetValueByName(object data, string namePath)

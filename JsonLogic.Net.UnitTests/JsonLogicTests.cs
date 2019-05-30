@@ -305,6 +305,9 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`!==`: [1,null]}", true)]
         [InlineData("{`!=`: [null,null]}", false)]
         [InlineData("{`!==`: [null,null]}", false)]
+        [InlineData("{`within`: [{`+`: [36.54, 22.309]}, 58.849, 0.000001]}", true)]
+        [InlineData("{`within`: [{`+`: [36.54, 22.309]}, 58.849, 0.000000000000008]}", true)]
+        [InlineData("{`within`: [{`+`: [36.54, 22.309]}, 58.849, 0.000000000000001]}", false)]
         public void EqualityAndInequalityHandling(string ruleJson, object expectedResult)
         {
             var rule = JsonFrom(ruleJson);
