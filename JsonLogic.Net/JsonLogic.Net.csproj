@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.0</TargetFrameworks>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Copyright>Copyright 2018</Copyright>
     <PackageLicenseUrl>https://raw.githubusercontent.com/yavuztor/JsonLogic.Net/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/yavuztor/JsonLogic.Net</PackageProjectUrl>
@@ -21,4 +22,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="publicKey.snk" />
+  </ItemGroup>
 </Project>
