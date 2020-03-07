@@ -25,4 +25,8 @@ jobs:
       run: dotnet build -c Debug
     - name: Dotnet test
       run: dotnet test --no-build -c Debug
+    - name: Publish package
+      env:
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      run: ./publish.sh
 

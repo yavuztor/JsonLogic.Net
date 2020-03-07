@@ -1,3 +1,5 @@
+## 1.1.8
+- Moved publishing package to github actions.
 ## 1.1.6
 - Added `within` operator to compare numbers with a precision.
 
