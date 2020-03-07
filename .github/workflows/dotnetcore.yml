@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
+    - name: Prepare signing key
+      run: echo $SIGNING_KEY | base64 -d > ../signingKey.snk
     - name: Dotnet build
       run: dotnet build -c Debug
     - name: Dotnet test
