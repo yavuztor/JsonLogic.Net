@@ -18,6 +18,8 @@ jobs:
       with:
         dotnet-version: 2.1.500
     - name: Prepare signing key
+      env:
+        SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
       run: echo $SIGNING_KEY | base64 -d -i> ../signingKey.snk
     - name: Dotnet build
       run: dotnet build -c Debug
