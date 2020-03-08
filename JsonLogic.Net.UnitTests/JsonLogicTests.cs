@@ -443,6 +443,11 @@ namespace JsonLogic.Net.UnitTests
 
         }
 
+        [Fact]
+        public void FailingTest()
+        {
+            Assert.True(false);
+        }
         private object GetDataObject(JToken token)
         {
             if (token is JValue) return CastPrimitive((token as JValue).Value);
