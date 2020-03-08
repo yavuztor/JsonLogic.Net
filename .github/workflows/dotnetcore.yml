@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  release:
+    types: [ created ]
 
 jobs:
   build:
@@ -17,16 +19,23 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.1.500
+
     - name: Prepare signing key
+      if: github.event_name != 'release'
       env:
         SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
       run: echo $SIGNING_KEY | base64 -d -i> ../signingKey.snk
+
     - name: Dotnet build
+      if: github.event_name != 'release'
       run: dotnet build -c Debug
+
     - name: Dotnet test
+      if: github.event_name != 'release'
       run: dotnet test --no-build -c Debug
+
     - name: Publish package
+      if: github.event_name == 'release'
       env:
         NUGET_KEY: ${{ secrets.NUGET_KEY }}
       run: ./publish.sh
-
