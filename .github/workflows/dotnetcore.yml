@@ -24,8 +24,10 @@ jobs:
     - name: Dotnet build
       run: dotnet build -c Debug
     - name: Dotnet test
+      if: github.ref == 'master'
       run: dotnet test --no-build -c Debug
     - name: Publish package
+      if: github.ref == 'master'
       env:
         NUGET_KEY: ${{ secrets.NUGET_KEY }}
       run: ./publish.sh
