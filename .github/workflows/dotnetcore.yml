@@ -26,10 +26,10 @@ jobs:
       run: echo $SIGNING_KEY | base64 -d -i> ../signingKey.snk
 
     - name: Dotnet build
-      run: dotnet build -c Debug
+      run: dotnet build -c Release
 
     - name: Dotnet test
-      run: dotnet test --no-build -c Debug
+      run: dotnet test --no-build -c Release
 
     - name: Publish package
       if: github.event_name == 'release'
