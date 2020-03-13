@@ -305,7 +305,6 @@ namespace JsonLogic.Net
         {
             return (p, args, data) =>
             {
-                var anyNestedValue = args.Any(a => a.HasValues);
                 var values = args
                     .Where(a => a != null)
                     .Select(a => p.Apply(a, data))
