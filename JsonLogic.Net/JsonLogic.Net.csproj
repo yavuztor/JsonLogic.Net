@@ -16,7 +16,15 @@
     <Description>A .Net implementation of [JsonLogic](http://jsonlogic.com).</Description>
     <Summary>JsonLogic defines a set of operators and rules to form a json definition of an expression, which can be evaluated against a data object. This helps serializing specification logic into client-side or to a back-end storage. It also helps to evaluate the same expression using different languages.</Summary>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>    
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.*" />
