@@ -395,7 +395,7 @@ namespace JsonLogic.Net.UnitTests
         {
             var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
 
-            var rule = JObject.Parse(@"{"">"": [{""var"": ""missingField""}, 1000]}");
+            var rule = JObject.Parse(@"{""" + op + @""": [{""var"": ""missingField""}, 1000]}");
 
             var result = evaluator.Apply(rule, Data).IsTruthy();
             
