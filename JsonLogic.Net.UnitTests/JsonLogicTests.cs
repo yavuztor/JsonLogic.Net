@@ -386,6 +386,22 @@ namespace JsonLogic.Net.UnitTests
             Assert.Equal(expected, result);
         }
 
+        [Theory]
+        [InlineData(">", false)]
+        [InlineData(">=", false)]
+        [InlineData("<", true)]
+        [InlineData("<=", true)]
+        public void GreaterThanLessThanWithMissingVar(string op, bool expectedResult)
+        {
+            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            var rule = JObject.Parse(@"{""" + op + @""": [{""var"": ""missingField""}, 1000]}");
+
+            var result = evaluator.Apply(rule, Data).IsTruthy();
+            
+            Assert.Equal(expectedResult, result);
+        }
+
 
         [Fact]
         public void Issue3_FilterBehaviorTest()
