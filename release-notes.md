@@ -1,3 +1,5 @@
+## 1.1.9
+- Added `netstandard2.1`. Updated test project to run with dotnet 3.1.
 ## 1.1.8
 - Moved publishing package to github actions.
 ## 1.1.6
