@@ -260,8 +260,12 @@ namespace JsonLogic.Net.UnitTests
         }
 
         [Theory]
-        [InlineData("{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", "[{`childArray`:[5,6,7,8],`childItem`:`c`}]")]
-        [InlineData("{`filter`:[{`var`:`parentNonExistentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", "null")]
+        [InlineData("{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", 
+            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", 
+            "[{`childArray`:[5,6,7,8],`childItem`:`c`}]")]
+        [InlineData("{`filter`:[{`var`:`parentNonExistentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", 
+            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", 
+            "null")]
         public void NestedFilterVariableAccess(string ruleJson, string dataJson, string expectedJson)
         {
             // Arrange
@@ -349,6 +353,62 @@ namespace JsonLogic.Net.UnitTests
             _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
             // Act
             var actualResult = jsonLogic.Apply(rule, localData);
+            Assert.Equal(expectedResult, actualResult);
+        }
+
+        [Theory]
+        // Null first parameter
+        [InlineData("{`local`:[null, {`var`:[`root.child.2`]}]}", 
+            "{`root`: {`child`:[0,100,200,300]}}", 
+            null)]
+        [InlineData("{`local`:[{`var`:``}, {`var`:[`root.child.2`]}]}", 
+            "{`root`: {`child`:[0,100,200,300]}}", 
+            200.0)]
+        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`root.child.2`]}]}", 
+            "{`root`: {`child`:[0,100,200,300]}}", 
+            null)]
+        // Null parameters
+        [InlineData("{`local`:[]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
+            null)]
+        // Extra argument should be ignored
+        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`child.3`]}, 11]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
+            300.0)]
+        // Single parameter only
+        [InlineData("{`local`:[{`var`:`root`}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
+            "{`child`:[0,100,200,300]}")]
+        // Simple local filter on complex object
+        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`child.3`]}]}", 
+            "{`root`: {`child`:[0,100,200,300]}}", 
+            300.0)]
+        // Filter array and get second element
+        [InlineData("{`local`:[{`filter`:[{`var`:`root.child`},{`>`:[{`var`:``},10]}]},{`var`:[1]}]}", 
+            "{`root`: {`child`:[0,100,200,300]}}", 
+            200.0)]
+        // Filter array of objects and get value of property of first match
+        [InlineData("{`local`:[{`filter`:[{`var`:`root.child1`},{`===`:[{`var`:`prop1`},`prop1 value 2`]}]},{`var`:[`0.prop2`]}]}",
+            "{`root`:{`child1`:[{`prop1`:`prop1 value 1`,`prop2`:`prop2 value 1`},{`prop1`:`prop1 value 2`,`prop2`:`prop2 value 2`}],`child2`:42}}", 
+            "prop2 value 2")]
+        // Filter array of objects and try to obtain property when no match found
+        [InlineData("{`local`:[{`filter`:[{`var`:`root.child1`},{`===`:[{`var`:`prop1`},`prop1 value 3`]}]},{`var`:[`0.prop2`]}]}",
+            "{`root`:{`child1`:[{`prop1`:`prop1 value 1`,`prop2`:`prop2 value 1`},{`prop1`:`prop1 value 2`,`prop2`:`prop2 value 2`}],`child2`:42}}",
+            null)]
+        public void LocalHandling(string ruleJson, string dataJson, object expectedResult)
+        {
+            var rule = JsonFrom(ruleJson);
+            var localData = JsonFrom(dataJson);
+            var jsonLogic = new JsonLogicEvaluator(EvaluateOperators.Default);
+
+            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {localData}");
+            // Act
+            var actualResult = jsonLogic.Apply(rule, localData);
+            if (actualResult is JToken)
+                // use json comparison
+                expectedResult = expectedResult == null
+                    ? JValue.CreateNull()
+                    : JsonFrom(expectedResult.ToString());
             Assert.Equal(expectedResult, actualResult);
         }
 
