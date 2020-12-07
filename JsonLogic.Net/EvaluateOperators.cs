@@ -259,6 +259,18 @@ namespace JsonLogic.Net
                 double precision = Convert.ToDouble(p.Apply(args[2], data));
                 return Math.Abs(first - second) <= precision;
             });
+
+            // Local processing operator changes scope of evaluations of its 
+            // second argument to result of the first argument
+            // i.e. "local": [ "sourceDataOrLogicAppliedToFullData", "logicToApplyToSourceOnly"]
+            AddOperator("local", (p, args, data) =>
+            {
+                // if blank arguments, return null, since nothing matches conditions
+                if (args.Length < 1) return null;
+                var local = p.Apply(args.First(), data);
+                if (args.Length >= 2) return p.Apply(args[1], local);
+                else return local; // return result of source evaluation
+            });
         }
 
         private object GetValueByName(object data, string namePath)
