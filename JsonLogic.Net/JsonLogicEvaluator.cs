@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
@@ -31,7 +32,7 @@ namespace JsonLogic.Net
 
         private object AdjustType(object value)
         {
-            return value.IsNumeric() ? Convert.ToDouble(value) : value;
+            return value.IsNumeric() ? Convert.ToDouble(value, new NumberFormatInfo()) : value;
         }
     }
 }
