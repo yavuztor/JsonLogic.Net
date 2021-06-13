@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -414,24 +415,7 @@ namespace JsonLogic.Net.UnitTests
 
 
         [Theory]
-        [JsonFileTestDefinitionAttribute("tests.json")]
-        public void PassesJsonLogicTests(string ruleJson, string dataJson, string expectedJson)
-        {
-            var rule = JsonFrom(ruleJson);
-            var data = GetDataObject(JsonFrom(dataJson));
-            var expected = GetDataObject(JsonFrom(expectedJson));
-
-            var evaluator = new JsonLogicEvaluator(EvaluateOperators.Default);
-
-            _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {data}");
-
-            var result = evaluator.Apply(rule, data);
-            Assert.Equal(expected, result);
-        }
-
-
-        [Theory]
-        [JsonFileTestDefinitionAttribute("jsonlogic.com_tests.json")]
+        [JsonFileTestDefinitionAttribute("https://jsonlogic.com/tests.json")]
         public void PassesJsonLogicDotComTests(string ruleJson, string dataJson, string expectedJson)
         {
             var rule = JsonFrom(ruleJson);
