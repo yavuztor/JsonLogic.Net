@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ namespace JsonLogic.Net.UnitTests
     public class JsonFileTestDefinitionAttribute : DataAttribute
     {
         private readonly string _filePath;
+        private static readonly HttpClient httpClient = new HttpClient();
         public JsonFileTestDefinitionAttribute(string filePath)
         {
             _filePath = filePath;
@@ -25,26 +27,45 @@ namespace JsonLogic.Net.UnitTests
         {
             if (testMethod == null) { throw new ArgumentNullException(nameof(testMethod)); }
 
+            string fileData = GetJson();
+
+            // load by hand to support existing file structure
+            var dataArray = JArray.Parse(fileData);
+
+            return dataArray.Where(item => item is JArray && ((JArray)item).Count >= 3)
+                .Select(item => new object[] { item[0].ToString(Formatting.None), item[1].ToString(Formatting.None), item[2].ToString(Formatting.None) });
+        }
+
+        private string GetJson()
+        {
+            try
+            {
+                return GetJsonFromUrl() ?? GetJsonFromFile();
+            }
+            catch (Exception requestException)
+            {
+                throw new FileNotFoundException($"Failed to read from file: '{_filePath}'", requestException);
+            }
+        }
+
+        private string GetJsonFromFile()
+        {
             // Get the absolute path to the JSON file
             var path = Path.IsPathRooted(_filePath)
                 ? _filePath
                 : Path.GetRelativePath(Directory.GetCurrentDirectory(), _filePath);
 
-            if (!File.Exists(path))
-            {
-                throw new ArgumentException($"Could not find file at path: {path}");
-            }
-
             // Load the file
-            var fileData = File.ReadAllText(_filePath);
-
-            // load by hand to support existing file structure
-            var dataArray = JArray.Parse(fileData);
-
-            return dataArray.Where(item => item is JArray && ((JArray) item).Count >= 3)
-                .Select(item => new object[] { item[0].ToString(Formatting.None), item[1].ToString(Formatting.None), item[2].ToString(Formatting.None) });
+            return File.ReadAllText(_filePath);
         }
 
-        
+        private string GetJsonFromUrl()
+        {
+            if (!_filePath.Contains("://")) return null;
+
+            var response = httpClient.GetAsync(_filePath).GetAwaiter().GetResult();
+            var content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return content;
+        }
     }
 }
