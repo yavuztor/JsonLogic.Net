@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace JsonLogic.Net 
+namespace JsonLogic.Net
 {
 
-    public static class ObjectExtensions 
+    public static class ObjectExtensions
     {
         public static bool IsEnumerable(this object d)
         {
@@ -24,11 +25,11 @@ namespace JsonLogic.Net
 
         public static bool EqualTo(this object value, object other)
         {
-            if (value is string || other is string) 
+            if (value is string || other is string)
                 return Convert.ToString(value).Equals(Convert.ToString(other));
-            
+
             if ((value.IsNumeric() || value is bool) && (other.IsNumeric() || other is bool))
-                return Convert.ToDouble(value).Equals(Convert.ToDouble(other));
+                return Convert.ToDouble(value, new NumberFormatInfo()).Equals(Convert.ToDouble(other, new NumberFormatInfo()));
 
             // special handling for nulls to avoid NullReferenceException
             if (value == null)
@@ -41,7 +42,7 @@ namespace JsonLogic.Net
 
 
         /// <summary>
-        /// Equivalent to JavaScript "===" comparer. 
+        /// Equivalent to JavaScript "===" comparer.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="other"></param>
@@ -52,7 +53,7 @@ namespace JsonLogic.Net
         }
 
 
-        public static bool IsNumeric(this object value) 
+        public static bool IsNumeric(this object value)
         {
             return (value is short || value is int || value is long || value is decimal || value is float || value is double);
         }
@@ -61,7 +62,7 @@ namespace JsonLogic.Net
         {
             if (value == null) return false;
             if (value is bool) return (bool) value;
-            if (value.IsNumeric()) return Convert.ToDouble(value) != 0;
+            if (value.IsNumeric()) return Convert.ToDouble(value, new NumberFormatInfo()) != 0;
             if (value.IsEnumerable()) return value.MakeEnumerable().Count() > 0;
             if (value is string) return (value as string).Length > 0;
             return true;

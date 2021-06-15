@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -261,11 +262,11 @@ namespace JsonLogic.Net.UnitTests
         }
 
         [Theory]
-        [InlineData("{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", 
-            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", 
+        [InlineData("{`filter`:[{`var`:`parentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}",
+            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}",
             "[{`childArray`:[5,6,7,8],`childItem`:`c`}]")]
-        [InlineData("{`filter`:[{`var`:`parentNonExistentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}", 
-            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}", 
+        [InlineData("{`filter`:[{`var`:`parentNonExistentArray`},{`and`:[{`===`:[{`var`:`childItem`},`c`]},{`filter`:[{`var`:`childArray`},{`===`:[{`var`:``},5]}]}]}]}",
+            "{`parentArray`:[{`childArray`:[1,2,3,4,5],`childItem`:`a`},{`childArray`:[4,5],`childItem`:`b`},{`childArray`:[5,6,7,8],`childItem`:`c`}]}",
             "null")]
         public void NestedFilterVariableAccess(string ruleJson, string dataJson, string expectedJson)
         {
@@ -359,14 +360,14 @@ namespace JsonLogic.Net.UnitTests
 
         [Theory]
         // Null first parameter
-        [InlineData("{`local`:[null, {`var`:[`root.child.2`]}]}", 
-            "{`root`: {`child`:[0,100,200,300]}}", 
+        [InlineData("{`local`:[null, {`var`:[`root.child.2`]}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
             null)]
-        [InlineData("{`local`:[{`var`:``}, {`var`:[`root.child.2`]}]}", 
-            "{`root`: {`child`:[0,100,200,300]}}", 
+        [InlineData("{`local`:[{`var`:``}, {`var`:[`root.child.2`]}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
             200.0)]
-        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`root.child.2`]}]}", 
-            "{`root`: {`child`:[0,100,200,300]}}", 
+        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`root.child.2`]}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
             null)]
         // Null parameters
         [InlineData("{`local`:[]}",
@@ -381,16 +382,16 @@ namespace JsonLogic.Net.UnitTests
             "{`root`: {`child`:[0,100,200,300]}}",
             "{`child`:[0,100,200,300]}")]
         // Simple local filter on complex object
-        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`child.3`]}]}", 
-            "{`root`: {`child`:[0,100,200,300]}}", 
+        [InlineData("{`local`:[{`var`:`root`}, {`var`:[`child.3`]}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
             300.0)]
         // Filter array and get second element
-        [InlineData("{`local`:[{`filter`:[{`var`:`root.child`},{`>`:[{`var`:``},10]}]},{`var`:[1]}]}", 
-            "{`root`: {`child`:[0,100,200,300]}}", 
+        [InlineData("{`local`:[{`filter`:[{`var`:`root.child`},{`>`:[{`var`:``},10]}]},{`var`:[1]}]}",
+            "{`root`: {`child`:[0,100,200,300]}}",
             200.0)]
         // Filter array of objects and get value of property of first match
         [InlineData("{`local`:[{`filter`:[{`var`:`root.child1`},{`===`:[{`var`:`prop1`},`prop1 value 2`]}]},{`var`:[`0.prop2`]}]}",
-            "{`root`:{`child1`:[{`prop1`:`prop1 value 1`,`prop2`:`prop2 value 1`},{`prop1`:`prop1 value 2`,`prop2`:`prop2 value 2`}],`child2`:42}}", 
+            "{`root`:{`child1`:[{`prop1`:`prop1 value 1`,`prop2`:`prop2 value 1`},{`prop1`:`prop1 value 2`,`prop2`:`prop2 value 2`}],`child2`:42}}",
             "prop2 value 2")]
         // Filter array of objects and try to obtain property when no match found
         [InlineData("{`local`:[{`filter`:[{`var`:`root.child1`},{`===`:[{`var`:`prop1`},`prop1 value 3`]}]},{`var`:[`0.prop2`]}]}",
@@ -427,6 +428,11 @@ namespace JsonLogic.Net.UnitTests
             _output.WriteLine($"{MethodBase.GetCurrentMethod().Name}() Testing {rule} against {data}");
 
             var result = evaluator.Apply(rule, data);
+
+            if (result.GetType().BaseType == typeof(Array))
+            {
+                Assert.Equal((object[])expected, (object[])result);
+            }
             Assert.Equal(expected, result);
         }
 
@@ -442,7 +448,6 @@ namespace JsonLogic.Net.UnitTests
             var rule = JObject.Parse(@"{""" + op + @""": [{""var"": ""missingField""}, 1000]}");
 
             var result = evaluator.Apply(rule, Data).IsTruthy();
-            
             Assert.Equal(expectedResult, result);
         }
 
@@ -498,9 +503,7 @@ namespace JsonLogic.Net.UnitTests
             var result = evaluator.Apply(rules, localData);
 
             // Assert
-            Assert.Equal(1, (result as object[]).Length);
-
-
+            Assert.True(((object[])result).Length == 1);
         }
 
         private object GetDataObject(JToken token)
@@ -519,7 +522,7 @@ namespace JsonLogic.Net.UnitTests
         private object CastPrimitive(object value)
         {
             if (value is int || value is short || value is long || value is double || value is float || value is decimal
-            ) return Convert.ToDouble(value);
+            ) return Convert.ToDouble(value, new NumberFormatInfo());
             return value;
         }
 
