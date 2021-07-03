@@ -319,16 +319,19 @@ namespace JsonLogic.Net
             return (p, args, data) =>
             {
                 var values = args
-                    .Where(a => a != null)
                     .Select(a => p.Apply(a, data))
+                    .Where(a => a != null)
                     .Select(a => JToken.FromObject(a))
                     .ToArray();
 
-                // all values text?
-                var allText = values.All(a => a.Type == JTokenType.String);
-                if (allText)
+                
+                var isAllText = values.All(a => a.Type == JTokenType.String);
+                if (isAllText)
                 {
-                    var valuesText = args.Select(a => a == null ? "" : p.Apply(a, data).ToString()).ToArray();
+                    var valuesText = args
+                        .Select(a => p.Apply(a, data))
+                        .Select(a => a == null ? "" : a.ToString())
+                        .ToArray();
                     for (int i = 1; i < valuesText.Length; i++)
                     {
 
@@ -339,7 +342,10 @@ namespace JsonLogic.Net
                 }
 
                 // not all values are of type text, assume these are Doubles or any other type and therefore handle this as before
-                var valuesDouble = values.Select(a => a == null ? 0d : Double.Parse(p.Apply(a, data).ToString())).ToArray();
+                var valuesDouble = args
+                    .Select(a => p.Apply(a, data))
+                    .Select(a => a == null ? 0d : Double.Parse(a.ToString()))
+                    .ToArray();
                 for (int i = 1; i < valuesDouble.Length; i++)
                 {
 
