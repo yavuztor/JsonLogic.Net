@@ -75,13 +75,14 @@ namespace JsonLogic.Net
             AddOperator("min", (p, args, data) => args.Select(a => Convert.ToDouble(p.Apply(a, data)))
                 .Aggregate((prev, next) => (prev < next) ? prev : next));
 
-            AddOperator("<", DoubleArgsSatisfy((prev, next) => prev < next));
+            AddOperator("<", GenericArgsSatisfy((prev, next) => prev < next, (prev, next) => string.CompareOrdinal(prev, next) < 0));
 
-            AddOperator("<=", DoubleArgsSatisfy((prev, next) => prev <= next));
-            
-            AddOperator(">", DoubleArgsSatisfy((prev, next) => prev > next));
+            AddOperator("<=", GenericArgsSatisfy((prev, next) => prev <= next, (prev, next) => string.CompareOrdinal(prev, next) <= 0));
 
-            AddOperator(">=", DoubleArgsSatisfy((prev, next) => prev >= next));
+            AddOperator(">", GenericArgsSatisfy((prev, next) => prev > next, (prev, next) => string.CompareOrdinal(prev, next) > 0));
+
+            AddOperator(">=", GenericArgsSatisfy((prev, next) => prev >= next, (prev, next) => string.CompareOrdinal(prev, next) >= 0));
+
 
             AddOperator("var", (p, args, data) => {
                 if (args.Count() == 0) return data;
@@ -313,21 +314,38 @@ namespace JsonLogic.Net
             return d.GetType().GetTypeInfo().ImplementedInterfaces.FirstOrDefault(t => t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>));
         }
 
-        // private Type EnumerableType(object d)
-        // {
-        //     return d.GetType().GetTypeInfo().ImplementedInterfaces.FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-        // }
-
-        private Func<IProcessJsonLogic, JToken[], object, object> DoubleArgsSatisfy(Func<double, double, bool> criteria)
+        private Func<IProcessJsonLogic, JToken[], object, object> GenericArgsSatisfy(Func<Double, Double, bool> criteriaDouble, Func<string, string, bool> criteriaText)
         {
-            return (p, args, data) => {
-                var values = args.Select(a => p.Apply(a, data))
-                    .Select(a => a == null ? 0d : double.Parse(a.ToString()))
+            return (p, args, data) =>
+            {
+                var values = args
+                    .Where(a => a != null)
+                    .Select(a => p.Apply(a, data))
+                    .Select(a => JToken.FromObject(a))
                     .ToArray();
-                
-                for (int i = 1; i < values.Length; i++) {
-                    if (!criteria(values[i-1], values[i])) return false;
+
+                // all values text?
+                var allText = values.All(a => a.Type == JTokenType.String);
+                if (allText)
+                {
+                    var valuesText = args.Select(a => a == null ? "" : p.Apply(a, data).ToString()).ToArray();
+                    for (int i = 1; i < valuesText.Length; i++)
+                    {
+
+                        if (!criteriaText(valuesText[i - 1], valuesText[i])) return false;
+                    }
+
+                    return true;
                 }
+
+                // not all values are of type text, assume these are Doubles or any other type and therefore handle this as before
+                var valuesDouble = values.Select(a => a == null ? 0d : Double.Parse(p.Apply(a, data).ToString())).ToArray();
+                for (int i = 1; i < valuesDouble.Length; i++)
+                {
+
+                    if (!criteriaDouble(valuesDouble[i - 1], valuesDouble[i])) return false;
+                }
+
                 return true;
             };
         }
