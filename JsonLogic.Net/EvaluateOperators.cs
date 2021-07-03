@@ -319,41 +319,27 @@ namespace JsonLogic.Net
             return (p, args, data) =>
             {
                 var values = args
-                    .Select(a => p.Apply(a, data))
+                    .Select(a => p.Apply(a, data));
+                    
+                var isAllText = values
                     .Where(a => a != null)
                     .Select(a => JToken.FromObject(a))
-                    .ToArray();
+                    .All(a => a.Type == JTokenType.String);
 
-                
-                var isAllText = values.All(a => a.Type == JTokenType.String);
-                if (isAllText)
-                {
-                    var valuesText = args
-                        .Select(a => p.Apply(a, data))
-                        .Select(a => a == null ? "" : a.ToString())
-                        .ToArray();
-                    for (int i = 1; i < valuesText.Length; i++)
-                    {
-
-                        if (!criteriaText(valuesText[i - 1], valuesText[i])) return false;
-                    }
-
-                    return true;
-                }
-
-                // not all values are of type text, assume these are Doubles or any other type and therefore handle this as before
-                var valuesDouble = args
-                    .Select(a => p.Apply(a, data))
-                    .Select(a => a == null ? 0d : Double.Parse(a.ToString()))
-                    .ToArray();
-                for (int i = 1; i < valuesDouble.Length; i++)
-                {
-
-                    if (!criteriaDouble(valuesDouble[i - 1], valuesDouble[i])) return false;
-                }
-
-                return true;
+                return isAllText ? CheckCriteria(values.Cast<string>().ToArray(), criteriaText)
+                : CheckCriteria(values.Select(a => a == null ? 0d : Double.Parse(a.ToString())).ToArray(), criteriaDouble);
             };
+        }
+
+        private bool CheckCriteria<T> (T [] values, Func<T, T, bool> criteria)
+        {
+            for (int i = 1; i < values.Length; i++)
+            {
+
+                if (!criteria(values[i - 1], values[i])) return false;
+            }
+
+            return true;
         }
 
         private static Func<IProcessJsonLogic, JToken[], object, object> ReduceDoubleArgs(double defaultValue, Func<double, double, double> reducer)
