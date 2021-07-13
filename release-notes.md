@@ -1,3 +1,6 @@
+## 1.1.10
+- Changed comparison operators to work with string values.
+
 ## 1.1.9
 - Added `netstandard2.1`. Updated test project to run with dotnet 3.1.
 ## 1.1.8
