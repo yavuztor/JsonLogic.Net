@@ -227,6 +227,7 @@ namespace JsonLogic.Net
             AddOperator("in", (p, args, data) => {
                 object needle = p.Apply(args[0], data);
                 object haystack = p.Apply(args[1], data);
+                if (haystack is null) return false;
                 if (haystack is String) return (haystack as string).IndexOf(needle.ToString()) >= 0;
 
                 return haystack.MakeEnumerable().Any(item => item.EqualTo(needle));

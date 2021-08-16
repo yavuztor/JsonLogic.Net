@@ -148,6 +148,9 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`in`: [`Spring`, `Springfield`]}", true)]
         [InlineData("{`in`: [`Springs`, `Springfield`]}", false)]
         [InlineData("{`in`: [`spring`, `Springfield`]}", false)]
+        
+        [InlineData("{`in`:[`/homePage`,{`var`:`page.url`}]}", false)]
+        
         [InlineData("{`cat`: [`spring`, `field`]}", "springfield")]
         [InlineData("{`substr`: [`springfield`, 6]}", "field")]
         [InlineData("{`substr`: [`springfield`, 6, 3]}", "fie")]
