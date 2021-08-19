@@ -1,3 +1,6 @@
+## 1.1.11
+- Fixed "in" operator failing when second argument (the haystack) is null.
+
 ## 1.1.10
 - Changed comparison operators to work with string values.
 
