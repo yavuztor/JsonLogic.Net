@@ -5,7 +5,7 @@
     <Version>1.1.11</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Copyright>Copyright 2018</Copyright>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/yavuztor/JsonLogic.Net/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/yavuztor/JsonLogic.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/yavuztor/JsonLogic.Net</RepositoryUrl>
     <PackageTags>jsonlogic specification evaluator</PackageTags>
