@@ -200,18 +200,18 @@ namespace JsonLogic.Net
             });
 
             AddOperator("all", (p, args, data) => {
-                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
+                IEnumerable<object> arr = p.Apply(args[0], data)?.MakeEnumerable() ?? Enumerable.Empty<object>();
                 if (arr.Count() == 0) return false;
                 return arr.All(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
             AddOperator("none", (p, args, data) => {
-                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
+                IEnumerable<object> arr = p.Apply(args[0], data)?.MakeEnumerable() ?? Enumerable.Empty<object>();
                 return !arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
             AddOperator("some", (p, args, data) => {
-                IEnumerable<object> arr = p.Apply(args[0], data).MakeEnumerable();
+                IEnumerable<object> arr = p.Apply(args[0], data)?.MakeEnumerable() ?? Enumerable.Empty<object>();
                 return arr.Any(item => Convert.ToBoolean(p.Apply(args[1], item)));
             });
 
