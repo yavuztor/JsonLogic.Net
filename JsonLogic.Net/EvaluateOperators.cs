@@ -233,7 +233,7 @@ namespace JsonLogic.Net
                 return haystack.MakeEnumerable().Any(item => item.EqualTo(needle));
             });
 
-            AddOperator("cat", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate("", (acc, current) => acc + current.ToString()));
+            AddOperator("cat", (p, args, data) => args.Select(a => p.Apply(a, data)).Aggregate("", (acc, current) => acc + current?.ToString()));
 
             AddOperator("substr", (p, args, data) => {
                 string value = p.Apply(args[0], data).ToString();
