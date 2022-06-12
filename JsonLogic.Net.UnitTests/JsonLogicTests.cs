@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -140,6 +139,7 @@ namespace JsonLogic.Net.UnitTests
         [InlineData("{`none`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", false)]
         [InlineData("{`some`: [{`var`:`luckyNumbers`}, {`<=`: [{`var`:``}, 3]} ]}", true)]
         [InlineData("{`some`:[{`var`:`luckyNumbers`},{`==`:[{`var`:``},3]}]}", true)]
+        [InlineData("{`some`:[{`var`:`nonExistingCollection`},{`==`:[{`var`:``},3]}]}", false)]
         [InlineData("{`merge`:[ [1,2], [3,4] ]}", new object[] {1, 2, 3, 4})]
         [InlineData("{`merge`:[ 1,2, [3,4] ]}", new object[] {1, 2, 3, 4})]
         [InlineData("{`in`:[ 1, [3,4,1] ]}", true)]
