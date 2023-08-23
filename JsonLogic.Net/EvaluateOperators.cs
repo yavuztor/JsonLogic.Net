@@ -320,8 +320,9 @@ namespace JsonLogic.Net
             return (p, args, data) =>
             {
                 var values = args
-                    .Select(a => p.Apply(a, data));
-                    
+                    .Select(a => p.Apply(a, data))
+                    .ToList();
+
                 var isAllText = values
                     .Where(a => a != null)
                     .Select(a => JToken.FromObject(a))
