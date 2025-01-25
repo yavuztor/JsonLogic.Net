@@ -1,3 +1,7 @@
+# Important: Ownership of JsonLogic.Net is Transferred
+The ownership of JsonLogic.Net package has been transferred to <https://github.com/MaxHayman/JsonLogic.Net>. Any further work on this library will be performed there. 
+Please update your forks to use `https://github.com/MaxHayman/JsonLogic.Net` for your contributions.
+
 # JsonLogic.Net - JsonLogic implementation in .Net platform
 
 JsonLogic.Net is an implementation of [JsonLogic](http://jsonlogic.com/) in .Net platform. Implementation includes [all supported operators documented on JsonLogic site](http://jsonlogic.com/operations.html).
